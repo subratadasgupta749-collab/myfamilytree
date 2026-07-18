@@ -38,16 +38,16 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { useSettings } from "@/hooks/use-settings";
 
-import hero from "@/assets/hero.jpg.asset.json";
-import book1 from "@/assets/book1.jpg.asset.json";
-import book2 from "@/assets/book2.jpg.asset.json";
-import book3 from "@/assets/book3.jpg.asset.json";
-import openbook from "@/assets/openbook.jpg.asset.json";
-import cta from "@/assets/cta.jpg.asset.json";
-import story from "@/assets/story.jpg.asset.json";
-import t1 from "@/assets/t1.jpg.asset.json";
-import t2 from "@/assets/t2.jpg.asset.json";
-import t3 from "@/assets/t3.jpg.asset.json";
+const hero = { url: "/hero.jpg" };
+const book1 = { url: "/book1.jpg" };
+const book2 = { url: "/book2.jpg" };
+const book3 = { url: "/book3.jpg" };
+const openbook = { url: "/openbook.jpg" };
+const cta = { url: "/cta.jpg" };
+const story = { url: "/story.jpg" };
+const t1 = { url: "/t1.jpg" };
+const t2 = { url: "/t2.jpg" };
+const t3 = { url: "/t3.jpg" };
 
 export const Route = createFileRoute("/")({
   head: () => ({
