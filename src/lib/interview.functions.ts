@@ -19,7 +19,7 @@ export const INTERVIEW_TOPICS = [
 export type InterviewTopic = (typeof INTERVIEW_TOPICS)[number];
 
 const MIN_Q = 3;
-const MAX_Q = 6;
+const MAX_Q = 4;
 
 async function ensureBookAccess(supabase: any, bookId: string) {
   const { data, error } = await supabase

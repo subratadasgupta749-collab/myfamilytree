@@ -32,6 +32,8 @@ import {
   Link as LinkIcon,
   BookHeart,
   Search,
+  Menu,
+  X,
 } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
@@ -190,6 +192,7 @@ function LandingHeader() {
   ];
   const navigate = useNavigate();
   const [q, setQ] = useState("");
+  const [open, setOpen] = useState(false);
   const onSearch = (e: React.FormEvent) => {
     e.preventDefault();
     const term = q.trim();
@@ -230,8 +233,49 @@ function LandingHeader() {
           <Button asChild className="rounded-full bg-[color:var(--primary)] px-5 text-[color:var(--primary-foreground)] shadow-[var(--shadow-soft)] hover:bg-[color:var(--primary)]/90">
             <Link to="/auth" search={{ mode: "register" }}>Start your book</Link>
           </Button>
+          <button
+            className="lg:hidden text-[color:var(--ink)] ml-1 focus:outline-none"
+            onClick={() => setOpen((o) => !o)}
+            aria-label="Toggle menu"
+          >
+            {open ? <X className="h-6 w-6" /> : <Menu className="h-6 w-6" />}
+          </button>
         </div>
       </div>
+
+      {open && (
+        <div className="border-t border-[color:var(--border)]/60 bg-[color:var(--beige)] lg:hidden">
+          <div className="mx-auto flex max-w-7xl flex-col gap-1 px-5 py-4">
+            {links.map((l) => (
+              <a
+                key={l.href}
+                href={l.href}
+                onClick={() => setOpen(false)}
+                className="rounded-md px-3 py-2 text-sm text-[color:var(--muted-foreground)] hover:bg-[color:var(--border)]/10 hover:text-[color:var(--ink)]"
+              >
+                {l.label}
+              </a>
+            ))}
+            <Link
+              to="/blog"
+              onClick={() => setOpen(false)}
+              className="rounded-md px-3 py-2 text-sm text-[color:var(--muted-foreground)] hover:bg-[color:var(--border)]/10 hover:text-[color:var(--ink)]"
+            >
+              Blog
+            </Link>
+            <div className="mt-2 flex flex-col gap-2 border-t border-[color:var(--border)]/60 pt-3">
+              <Link
+                to="/auth"
+                onClick={() => setOpen(false)}
+                className="rounded-md px-3 py-2 text-sm text-[color:var(--muted-foreground)] hover:bg-[color:var(--border)]/10 hover:text-[color:var(--ink)]"
+              >
+                Sign in
+              </Link>
+            </div>
+          </div>
+        </div>
+      )}
+
       <form onSubmit={onSearch} className="relative mx-auto mb-3 block max-w-md px-5 md:hidden">
         <Search className="pointer-events-none absolute left-8 top-1/2 h-4 w-4 -translate-y-1/2 text-[color:var(--muted-foreground)]" />
         <Input
@@ -698,34 +742,33 @@ function FinalCTA() {
   return (
     <section className="relative overflow-hidden">
       <div className="relative mx-auto max-w-7xl px-5 py-10 sm:px-8">
-        <div className="relative overflow-hidden rounded-[2.5rem] shadow-[var(--shadow-luxury)] ring-1 ring-black/5">
+        <div className="relative overflow-hidden rounded-[2.5rem] shadow-[var(--shadow-luxury)] ring-1 ring-black/5 min-h-[420px] sm:min-h-[480px] md:min-h-[520px] flex flex-col justify-center">
           <img
             src={cta.url}
             alt="A multigenerational family laughing together around a dinner table at golden hour"
             loading="lazy"
             width={1600}
             height={1008}
-            className="h-full w-full object-cover"
+            className="absolute inset-0 h-full w-full object-cover"
           />
-          <div className="absolute inset-0 bg-gradient-to-r from-black/70 via-black/40 to-transparent" />
-          <div className="absolute inset-0 flex items-center">
-            <div className="max-w-2xl p-10 text-white sm:p-16 md:p-20">
-              <SectionEyebrow>
-                <span className="text-[color:var(--gold)]">The time is now</span>
-              </SectionEyebrow>
-              <h2 className="mt-5 font-serif text-4xl leading-tight tracking-tight text-white sm:text-5xl md:text-6xl">
-                Don't let their story fade away.
-              </h2>
-              <p className="mt-5 max-w-lg text-lg text-white/85">
-                Begin today. The book you create will be treasured long after we're gone.
-              </p>
-              <Button asChild size="lg" className="mt-8 h-13 rounded-full bg-[color:var(--gold)] px-7 text-base text-[color:var(--accent-foreground)] shadow-[var(--shadow-luxury)] hover:bg-[color:var(--gold)]/90">
-                <Link to="/auth" search={{ mode: "register" }}>
-                  Start creating your family history book
-                  <ArrowRight className="ml-1 h-4 w-4" />
-                </Link>
-              </Button>
-            </div>
+          <div className="absolute inset-0 bg-gradient-to-r from-black/80 via-black/50 to-transparent" />
+          <div className="relative z-10 max-w-2xl p-6 sm:p-12 md:p-16 text-white">
+            <SectionEyebrow>
+              <span className="text-[color:var(--gold)]">The time is now</span>
+            </SectionEyebrow>
+            <h2 className="mt-5 font-serif text-3xl leading-tight tracking-tight text-white sm:text-5xl md:text-6xl">
+              Don't let their story fade away.
+            </h2>
+            <p className="mt-4 max-w-lg text-base text-white/85 sm:text-lg">
+              Begin today. The book you create will be treasured long after we're gone.
+            </p>
+            <Button asChild size="lg" className="mt-8 h-13 rounded-full bg-[color:var(--gold)] px-7 text-base text-[color:var(--accent-foreground)] shadow-[var(--shadow-luxury)] hover:bg-[color:var(--gold)]/90 max-w-full">
+              <Link to="/auth" search={{ mode: "register" }} className="flex items-center justify-center">
+                <span className="hidden sm:inline">Start creating your family history book</span>
+                <span className="sm:hidden">Start your book</span>
+                <ArrowRight className="ml-2 h-4 w-4 shrink-0" />
+              </Link>
+            </Button>
           </div>
         </div>
       </div>
@@ -757,6 +800,9 @@ function LandingFooter() {
   const socialLinks = Object.entries(SOCIAL_ICONS)
     .map(([key, meta]) => ({ key, url: social[key]?.trim(), ...meta }))
     .filter((s) => !!s.url);
+
+  console.log("LandingFooter Settings:", settings);
+  console.log("LandingFooter Social Links:", socialLinks);
 
   return (
     <footer className="border-t border-[color:var(--border)] bg-[color:var(--cream)]">
