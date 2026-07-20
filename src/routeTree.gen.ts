@@ -25,6 +25,7 @@ import { Route as BlogSlugRouteImport } from './routes/blog.$slug'
 import { Route as AuthenticatedAppRouteImport } from './routes/_authenticated/_app'
 import { Route as AuthenticatedAdminRouteImport } from './routes/_authenticated/_admin'
 import { Route as ApiPublicSettingsRouteImport } from './routes/api/public/settings'
+import { Route as ApiPublicPaypalCallbackRouteImport } from './routes/api/public/paypal-callback'
 import { Route as AuthenticatedAppReferralsRouteImport } from './routes/_authenticated/_app/referrals'
 import { Route as AuthenticatedAppProfileRouteImport } from './routes/_authenticated/_app/profile'
 import { Route as AuthenticatedAppOrdersRouteImport } from './routes/_authenticated/_app/orders'
@@ -144,6 +145,11 @@ const AuthenticatedAdminRoute = AuthenticatedAdminRouteImport.update({
 const ApiPublicSettingsRoute = ApiPublicSettingsRouteImport.update({
   id: '/api/public/settings',
   path: '/api/public/settings',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ApiPublicPaypalCallbackRoute = ApiPublicPaypalCallbackRouteImport.update({
+  id: '/api/public/paypal-callback',
+  path: '/api/public/paypal-callback',
   getParentRoute: () => rootRouteImport,
 } as any)
 const AuthenticatedAppReferralsRoute =
@@ -421,6 +427,7 @@ export interface FileRoutesByFullPath {
   '/orders': typeof AuthenticatedAppOrdersRoute
   '/profile': typeof AuthenticatedAppProfileRoute
   '/referrals': typeof AuthenticatedAppReferralsRoute
+  '/api/public/paypal-callback': typeof ApiPublicPaypalCallbackRoute
   '/api/public/settings': typeof ApiPublicSettingsRoute
   '/admin/ai-audit': typeof AuthenticatedAdminAdminAiAuditRoute
   '/admin/ai-costs': typeof AuthenticatedAdminAdminAiCostsRoute
@@ -479,6 +486,7 @@ export interface FileRoutesByTo {
   '/orders': typeof AuthenticatedAppOrdersRoute
   '/profile': typeof AuthenticatedAppProfileRoute
   '/referrals': typeof AuthenticatedAppReferralsRoute
+  '/api/public/paypal-callback': typeof ApiPublicPaypalCallbackRoute
   '/api/public/settings': typeof ApiPublicSettingsRoute
   '/admin/ai-audit': typeof AuthenticatedAdminAdminAiAuditRoute
   '/admin/ai-costs': typeof AuthenticatedAdminAdminAiCostsRoute
@@ -541,6 +549,7 @@ export interface FileRoutesById {
   '/_authenticated/_app/orders': typeof AuthenticatedAppOrdersRoute
   '/_authenticated/_app/profile': typeof AuthenticatedAppProfileRoute
   '/_authenticated/_app/referrals': typeof AuthenticatedAppReferralsRoute
+  '/api/public/paypal-callback': typeof ApiPublicPaypalCallbackRoute
   '/api/public/settings': typeof ApiPublicSettingsRoute
   '/_authenticated/_admin/admin/ai-audit': typeof AuthenticatedAdminAdminAiAuditRoute
   '/_authenticated/_admin/admin/ai-costs': typeof AuthenticatedAdminAdminAiCostsRoute
@@ -601,6 +610,7 @@ export interface FileRouteTypes {
     | '/orders'
     | '/profile'
     | '/referrals'
+    | '/api/public/paypal-callback'
     | '/api/public/settings'
     | '/admin/ai-audit'
     | '/admin/ai-costs'
@@ -659,6 +669,7 @@ export interface FileRouteTypes {
     | '/orders'
     | '/profile'
     | '/referrals'
+    | '/api/public/paypal-callback'
     | '/api/public/settings'
     | '/admin/ai-audit'
     | '/admin/ai-costs'
@@ -720,6 +731,7 @@ export interface FileRouteTypes {
     | '/_authenticated/_app/orders'
     | '/_authenticated/_app/profile'
     | '/_authenticated/_app/referrals'
+    | '/api/public/paypal-callback'
     | '/api/public/settings'
     | '/_authenticated/_admin/admin/ai-audit'
     | '/_authenticated/_admin/admin/ai-costs'
@@ -775,6 +787,7 @@ export interface RootRouteChildren {
   TermsRoute: typeof TermsRoute
   BlogSlugRoute: typeof BlogSlugRoute
   BlogIndexRoute: typeof BlogIndexRoute
+  ApiPublicPaypalCallbackRoute: typeof ApiPublicPaypalCallbackRoute
   ApiPublicSettingsRoute: typeof ApiPublicSettingsRoute
   ApiPublicBlogImagesSplatRoute: typeof ApiPublicBlogImagesSplatRoute
   ApiPublicWebhooksGatewayRoute: typeof ApiPublicWebhooksGatewayRoute
@@ -892,6 +905,13 @@ declare module '@tanstack/react-router' {
       path: '/api/public/settings'
       fullPath: '/api/public/settings'
       preLoaderRoute: typeof ApiPublicSettingsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/public/paypal-callback': {
+      id: '/api/public/paypal-callback'
+      path: '/api/public/paypal-callback'
+      fullPath: '/api/public/paypal-callback'
+      preLoaderRoute: typeof ApiPublicPaypalCallbackRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/_authenticated/_app/referrals': {
@@ -1347,6 +1367,7 @@ const rootRouteChildren: RootRouteChildren = {
   TermsRoute: TermsRoute,
   BlogSlugRoute: BlogSlugRoute,
   BlogIndexRoute: BlogIndexRoute,
+  ApiPublicPaypalCallbackRoute: ApiPublicPaypalCallbackRoute,
   ApiPublicSettingsRoute: ApiPublicSettingsRoute,
   ApiPublicBlogImagesSplatRoute: ApiPublicBlogImagesSplatRoute,
   ApiPublicWebhooksGatewayRoute: ApiPublicWebhooksGatewayRoute,
