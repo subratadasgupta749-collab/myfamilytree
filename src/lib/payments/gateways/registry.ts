@@ -2,6 +2,7 @@ import type { GatewayAdapter } from "./types";
 import { lemonSqueezyAdapter } from "./lemonsqueezy";
 import { wiseAdapter } from "./wise";
 import { payoneerAdapter } from "./payoneer";
+import { paypalAdapter } from "./paypal";
 
 /**
  * To add a new payment gateway:
@@ -10,7 +11,7 @@ import { payoneerAdapter } from "./payoneer";
  *   3. Insert a row into `public.payment_gateways` (slug matches adapter.slug).
  * No frontend changes required — the admin panel is fully data-driven.
  */
-const adapters: GatewayAdapter[] = [lemonSqueezyAdapter, wiseAdapter, payoneerAdapter];
+const adapters: GatewayAdapter[] = [lemonSqueezyAdapter, wiseAdapter, payoneerAdapter, paypalAdapter];
 
 export function getAdapter(slug: string): GatewayAdapter | null {
   return adapters.find((a) => a.slug === slug) ?? null;

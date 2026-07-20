@@ -87,7 +87,7 @@ export const listGateways = createServerFn({ method: "GET" })
         credentials_masked: masked,
         required_fields: adapter?.requiredFields ?? [],
         optional_fields: adapter?.optionalFields ?? [],
-        supports_hosted_checkout: !!adapter && adapter.slug === "lemonsqueezy",
+        supports_hosted_checkout: !!adapter && (adapter.slug === "lemonsqueezy" || adapter.slug === "paypal"),
       };
     });
   });
@@ -388,6 +388,10 @@ export const initiateCheckout = createServerFn({ method: "POST" })
     if (txErr) throw new Error(txErr.message);
 
     try {
+      const finalSuccessUrl = row.slug === "paypal"
+        ? `${data.origin}/api/public/paypal-callback?txId=${tx.id}`
+        : successUrl;
+
       const result = await adapter.createCheckout({
         credentials: creds,
         mode: row.mode,
@@ -396,11 +400,11 @@ export const initiateCheckout = createServerFn({ method: "POST" })
           currency: data.currency ?? row.currency,
           description: data.description,
           customerEmail: data.customerEmail,
-          successUrl,
+          successUrl: finalSuccessUrl,
           cancelUrl,
           metadata: { ...(data.metadata ?? {}), tx_id: tx.id },
         },
-        settings: { successUrl, cancelUrl, instructions: row.payment_instructions },
+        settings: { successUrl: finalSuccessUrl, cancelUrl, instructions: row.payment_instructions },
       });
 
       await context.supabase
