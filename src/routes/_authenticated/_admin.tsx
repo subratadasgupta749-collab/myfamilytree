@@ -84,6 +84,7 @@ const navGroups: NavGroup[] = [
       { to: "/admin/books", label: "Books", icon: BookOpen },
       { to: "/admin/orders", label: "Orders", icon: ShoppingBag },
       { to: "/admin/downloads", label: "Downloads", icon: HardDriveDownload },
+      { to: "/admin/storage", label: "Blob Storage", icon: HardDrive, badge: "S3" },
     ],
   },
   {

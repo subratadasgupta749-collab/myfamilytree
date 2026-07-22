@@ -44,6 +44,7 @@ import { Route as AuthenticatedAppCheckoutCancelRouteImport } from './routes/_au
 import { Route as AuthenticatedAppBooksNewRouteImport } from './routes/_authenticated/_app/books.new'
 import { Route as AuthenticatedAdminAdminUsersRouteImport } from './routes/_authenticated/_admin/admin.users'
 import { Route as AuthenticatedAdminAdminSupportRouteImport } from './routes/_authenticated/_admin/admin.support'
+import { Route as AuthenticatedAdminAdminStorageRouteImport } from './routes/_authenticated/_admin/admin.storage'
 import { Route as AuthenticatedAdminAdminSettingsRouteImport } from './routes/_authenticated/_admin/admin.settings'
 import { Route as AuthenticatedAdminAdminSeoRouteImport } from './routes/_authenticated/_admin/admin.seo'
 import { Route as AuthenticatedAdminAdminReportsRouteImport } from './routes/_authenticated/_admin/admin.reports'
@@ -270,6 +271,12 @@ const AuthenticatedAdminAdminSupportRoute =
   AuthenticatedAdminAdminSupportRouteImport.update({
     id: '/admin/support',
     path: '/admin/support',
+    getParentRoute: () => AuthenticatedAdminRoute,
+  } as any)
+const AuthenticatedAdminAdminStorageRoute =
+  AuthenticatedAdminAdminStorageRouteImport.update({
+    id: '/admin/storage',
+    path: '/admin/storage',
     getParentRoute: () => AuthenticatedAdminRoute,
   } as any)
 const AuthenticatedAdminAdminSettingsRoute =
@@ -569,6 +576,7 @@ export interface FileRoutesByFullPath {
   '/admin/reports': typeof AuthenticatedAdminAdminReportsRoute
   '/admin/seo': typeof AuthenticatedAdminAdminSeoRoute
   '/admin/settings': typeof AuthenticatedAdminAdminSettingsRoute
+  '/admin/storage': typeof AuthenticatedAdminAdminStorageRoute
   '/admin/support': typeof AuthenticatedAdminAdminSupportRoute
   '/admin/users': typeof AuthenticatedAdminAdminUsersRoute
   '/books/new': typeof AuthenticatedAppBooksNewRoute
@@ -643,6 +651,7 @@ export interface FileRoutesByTo {
   '/admin/reports': typeof AuthenticatedAdminAdminReportsRoute
   '/admin/seo': typeof AuthenticatedAdminAdminSeoRoute
   '/admin/settings': typeof AuthenticatedAdminAdminSettingsRoute
+  '/admin/storage': typeof AuthenticatedAdminAdminStorageRoute
   '/admin/support': typeof AuthenticatedAdminAdminSupportRoute
   '/admin/users': typeof AuthenticatedAdminAdminUsersRoute
   '/books/new': typeof AuthenticatedAppBooksNewRoute
@@ -721,6 +730,7 @@ export interface FileRoutesById {
   '/_authenticated/_admin/admin/reports': typeof AuthenticatedAdminAdminReportsRoute
   '/_authenticated/_admin/admin/seo': typeof AuthenticatedAdminAdminSeoRoute
   '/_authenticated/_admin/admin/settings': typeof AuthenticatedAdminAdminSettingsRoute
+  '/_authenticated/_admin/admin/storage': typeof AuthenticatedAdminAdminStorageRoute
   '/_authenticated/_admin/admin/support': typeof AuthenticatedAdminAdminSupportRoute
   '/_authenticated/_admin/admin/users': typeof AuthenticatedAdminAdminUsersRoute
   '/_authenticated/_app/books/new': typeof AuthenticatedAppBooksNewRoute
@@ -797,6 +807,7 @@ export interface FileRouteTypes {
     | '/admin/reports'
     | '/admin/seo'
     | '/admin/settings'
+    | '/admin/storage'
     | '/admin/support'
     | '/admin/users'
     | '/books/new'
@@ -871,6 +882,7 @@ export interface FileRouteTypes {
     | '/admin/reports'
     | '/admin/seo'
     | '/admin/settings'
+    | '/admin/storage'
     | '/admin/support'
     | '/admin/users'
     | '/books/new'
@@ -948,6 +960,7 @@ export interface FileRouteTypes {
     | '/_authenticated/_admin/admin/reports'
     | '/_authenticated/_admin/admin/seo'
     | '/_authenticated/_admin/admin/settings'
+    | '/_authenticated/_admin/admin/storage'
     | '/_authenticated/_admin/admin/support'
     | '/_authenticated/_admin/admin/users'
     | '/_authenticated/_app/books/new'
@@ -1232,6 +1245,13 @@ declare module '@tanstack/react-router' {
       path: '/admin/support'
       fullPath: '/admin/support'
       preLoaderRoute: typeof AuthenticatedAdminAdminSupportRouteImport
+      parentRoute: typeof AuthenticatedAdminRoute
+    }
+    '/_authenticated/_admin/admin/storage': {
+      id: '/_authenticated/_admin/admin/storage'
+      path: '/admin/storage'
+      fullPath: '/admin/storage'
+      preLoaderRoute: typeof AuthenticatedAdminAdminStorageRouteImport
       parentRoute: typeof AuthenticatedAdminRoute
     }
     '/_authenticated/_admin/admin/settings': {
@@ -1550,6 +1570,7 @@ interface AuthenticatedAdminRouteChildren {
   AuthenticatedAdminAdminReportsRoute: typeof AuthenticatedAdminAdminReportsRoute
   AuthenticatedAdminAdminSeoRoute: typeof AuthenticatedAdminAdminSeoRoute
   AuthenticatedAdminAdminSettingsRoute: typeof AuthenticatedAdminAdminSettingsRoute
+  AuthenticatedAdminAdminStorageRoute: typeof AuthenticatedAdminAdminStorageRoute
   AuthenticatedAdminAdminSupportRoute: typeof AuthenticatedAdminAdminSupportRoute
   AuthenticatedAdminAdminUsersRoute: typeof AuthenticatedAdminAdminUsersRoute
   AuthenticatedAdminAdminIndexRoute: typeof AuthenticatedAdminAdminIndexRoute
@@ -1600,6 +1621,7 @@ const AuthenticatedAdminRouteChildren: AuthenticatedAdminRouteChildren = {
   AuthenticatedAdminAdminReportsRoute: AuthenticatedAdminAdminReportsRoute,
   AuthenticatedAdminAdminSeoRoute: AuthenticatedAdminAdminSeoRoute,
   AuthenticatedAdminAdminSettingsRoute: AuthenticatedAdminAdminSettingsRoute,
+  AuthenticatedAdminAdminStorageRoute: AuthenticatedAdminAdminStorageRoute,
   AuthenticatedAdminAdminSupportRoute: AuthenticatedAdminAdminSupportRoute,
   AuthenticatedAdminAdminUsersRoute: AuthenticatedAdminAdminUsersRoute,
   AuthenticatedAdminAdminIndexRoute: AuthenticatedAdminAdminIndexRoute,
