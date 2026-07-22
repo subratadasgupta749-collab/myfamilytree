@@ -503,7 +503,10 @@ export const exportBook = createServerFn({ method: "POST" })
       .single();
     if (insErr) throw new Error(insErr.message);
 
-    return row;
+    return {
+      ...row,
+      url: `/api/downloads/${row.id}`,
+    };
   });
 
 export const generateExport = exportBook;
@@ -521,36 +524,10 @@ export const listExports = createServerFn({ method: "GET" })
       .order("created_at", { ascending: false });
     if (error) throw new Error(error.message);
 
-    const paths = (rows ?? []).map((r: any) => r.storage_path);
-    let urlMap = new Map<string, string>();
-    if (paths.length > 0) {
-      await ensureBucketExists("book-exports", false);
-      let signedItems: any[] = [];
-      try {
-        const { data: signed, error: sErr } = await context.supabase.storage
-          .from("book-exports")
-          .createSignedUrls(paths, 60 * 60);
-        if (!sErr && signed) {
-          signedItems = signed;
-        }
-      } catch {}
-
-      if (signedItems.length === 0 || signedItems.some((s: any) => s.error)) {
-        try {
-          const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
-          await supabaseAdmin.storage.createBucket("book-exports", { public: false }).catch(() => {});
-          const { data: adminSigned } = await supabaseAdmin.storage
-            .from("book-exports")
-            .createSignedUrls(paths, 60 * 60);
-          if (adminSigned) signedItems = adminSigned;
-        } catch {}
-      }
-
-      urlMap = new Map(
-        (signedItems ?? []).map((s: any) => [s.path as string, s.signedUrl as string]),
-      );
-    }
-    return (rows ?? []).map((r: any) => ({ ...r, url: urlMap.get(r.storage_path) ?? null }));
+    return (rows ?? []).map((r: any) => ({
+      ...r,
+      url: `/api/downloads/${r.id}`,
+    }));
   });
 
 export const deleteExport = createServerFn({ method: "POST" })
@@ -587,38 +564,9 @@ export const listAllMyExports = createServerFn({ method: "GET" })
       .order("created_at", { ascending: false });
     if (error) throw new Error(error.message);
 
-    const paths = (rows ?? []).map((r: any) => r.storage_path);
-    let urlMap = new Map<string, string>();
-    if (paths.length > 0) {
-      await ensureBucketExists("book-exports", false);
-      let signedItems: any[] = [];
-      try {
-        const { data: signed, error: sErr } = await context.supabase.storage
-          .from("book-exports")
-          .createSignedUrls(paths, 60 * 60);
-        if (!sErr && signed) {
-          signedItems = signed;
-        }
-      } catch {}
-
-      if (signedItems.length === 0 || signedItems.some((s: any) => s.error)) {
-        try {
-          const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
-          await supabaseAdmin.storage.createBucket("book-exports", { public: false }).catch(() => {});
-          const { data: adminSigned } = await supabaseAdmin.storage
-            .from("book-exports")
-            .createSignedUrls(paths, 60 * 60);
-          if (adminSigned) signedItems = adminSigned;
-        } catch {}
-      }
-
-      urlMap = new Map(
-        (signedItems ?? []).map((s: any) => [s.path as string, s.signedUrl as string]),
-      );
-    }
     return (rows ?? []).map((r: any) => ({
       ...r,
       book_name: r.books?.name ?? "Family History Book",
-      url: urlMap.get(r.storage_path) ?? null,
+      url: `/api/downloads/${r.id}`,
     }));
   });
