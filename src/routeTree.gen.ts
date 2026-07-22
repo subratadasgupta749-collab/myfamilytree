@@ -45,16 +45,23 @@ import { Route as AuthenticatedAppBooksNewRouteImport } from './routes/_authenti
 import { Route as AuthenticatedAdminAdminUsersRouteImport } from './routes/_authenticated/_admin/admin.users'
 import { Route as AuthenticatedAdminAdminSupportRouteImport } from './routes/_authenticated/_admin/admin.support'
 import { Route as AuthenticatedAdminAdminSettingsRouteImport } from './routes/_authenticated/_admin/admin.settings'
+import { Route as AuthenticatedAdminAdminSeoRouteImport } from './routes/_authenticated/_admin/admin.seo'
+import { Route as AuthenticatedAdminAdminReportsRouteImport } from './routes/_authenticated/_admin/admin.reports'
 import { Route as AuthenticatedAdminAdminReferralsRouteImport } from './routes/_authenticated/_admin/admin.referrals'
 import { Route as AuthenticatedAdminAdminPlansRouteImport } from './routes/_authenticated/_admin/admin.plans'
 import { Route as AuthenticatedAdminAdminPaymentGatewaysRouteImport } from './routes/_authenticated/_admin/admin.payment-gateways'
 import { Route as AuthenticatedAdminAdminOrdersRouteImport } from './routes/_authenticated/_admin/admin.orders'
 import { Route as AuthenticatedAdminAdminMessagesRouteImport } from './routes/_authenticated/_admin/admin.messages'
+import { Route as AuthenticatedAdminAdminMediaRouteImport } from './routes/_authenticated/_admin/admin.media'
+import { Route as AuthenticatedAdminAdminFeatureManagerRouteImport } from './routes/_authenticated/_admin/admin.feature-manager'
 import { Route as AuthenticatedAdminAdminEmailTemplatesRouteImport } from './routes/_authenticated/_admin/admin.email-templates'
 import { Route as AuthenticatedAdminAdminEmailLogsRouteImport } from './routes/_authenticated/_admin/admin.email-logs'
+import { Route as AuthenticatedAdminAdminEmailCenterRouteImport } from './routes/_authenticated/_admin/admin.email-center'
 import { Route as AuthenticatedAdminAdminCouponsRouteImport } from './routes/_authenticated/_admin/admin.coupons'
 import { Route as AuthenticatedAdminAdminCacheRouteImport } from './routes/_authenticated/_admin/admin.cache'
 import { Route as AuthenticatedAdminAdminBooksRouteImport } from './routes/_authenticated/_admin/admin.books'
+import { Route as AuthenticatedAdminAdminBackupRouteImport } from './routes/_authenticated/_admin/admin.backup'
+import { Route as AuthenticatedAdminAdminApiManagerRouteImport } from './routes/_authenticated/_admin/admin.api-manager'
 import { Route as AuthenticatedAdminAdminAnalyticsRouteImport } from './routes/_authenticated/_admin/admin.analytics'
 import { Route as AuthenticatedAdminAdminAiRoutingRouteImport } from './routes/_authenticated/_admin/admin.ai-routing'
 import { Route as AuthenticatedAdminAdminAiProvidersRouteImport } from './routes/_authenticated/_admin/admin.ai-providers'
@@ -67,6 +74,8 @@ import { Route as AuthenticatedAdminAdminAiFeaturesRouteImport } from './routes/
 import { Route as AuthenticatedAdminAdminAiFallbackRouteImport } from './routes/_authenticated/_admin/admin.ai-fallback'
 import { Route as AuthenticatedAdminAdminAiCostsRouteImport } from './routes/_authenticated/_admin/admin.ai-costs'
 import { Route as AuthenticatedAdminAdminAiAuditRouteImport } from './routes/_authenticated/_admin/admin.ai-audit'
+import { Route as AuthenticatedAdminAdminAiRouteImport } from './routes/_authenticated/_admin/admin.ai'
+import { Route as AuthenticatedAdminAdminActivityLogsRouteImport } from './routes/_authenticated/_admin/admin.activity-logs'
 import { Route as AuthenticatedAppBooksBookIdIndexRouteImport } from './routes/_authenticated/_app/books.$bookId.index'
 import { Route as AuthenticatedAdminAdminBlogIndexRouteImport } from './routes/_authenticated/_admin/admin.blog.index'
 import { Route as AuthenticatedAppBooksBookIdPreviewRouteImport } from './routes/_authenticated/_app/books.$bookId.preview'
@@ -269,6 +278,18 @@ const AuthenticatedAdminAdminSettingsRoute =
     path: '/admin/settings',
     getParentRoute: () => AuthenticatedAdminRoute,
   } as any)
+const AuthenticatedAdminAdminSeoRoute =
+  AuthenticatedAdminAdminSeoRouteImport.update({
+    id: '/admin/seo',
+    path: '/admin/seo',
+    getParentRoute: () => AuthenticatedAdminRoute,
+  } as any)
+const AuthenticatedAdminAdminReportsRoute =
+  AuthenticatedAdminAdminReportsRouteImport.update({
+    id: '/admin/reports',
+    path: '/admin/reports',
+    getParentRoute: () => AuthenticatedAdminRoute,
+  } as any)
 const AuthenticatedAdminAdminReferralsRoute =
   AuthenticatedAdminAdminReferralsRouteImport.update({
     id: '/admin/referrals',
@@ -299,6 +320,18 @@ const AuthenticatedAdminAdminMessagesRoute =
     path: '/admin/messages',
     getParentRoute: () => AuthenticatedAdminRoute,
   } as any)
+const AuthenticatedAdminAdminMediaRoute =
+  AuthenticatedAdminAdminMediaRouteImport.update({
+    id: '/admin/media',
+    path: '/admin/media',
+    getParentRoute: () => AuthenticatedAdminRoute,
+  } as any)
+const AuthenticatedAdminAdminFeatureManagerRoute =
+  AuthenticatedAdminAdminFeatureManagerRouteImport.update({
+    id: '/admin/feature-manager',
+    path: '/admin/feature-manager',
+    getParentRoute: () => AuthenticatedAdminRoute,
+  } as any)
 const AuthenticatedAdminAdminEmailTemplatesRoute =
   AuthenticatedAdminAdminEmailTemplatesRouteImport.update({
     id: '/admin/email-templates',
@@ -309,6 +342,12 @@ const AuthenticatedAdminAdminEmailLogsRoute =
   AuthenticatedAdminAdminEmailLogsRouteImport.update({
     id: '/admin/email-logs',
     path: '/admin/email-logs',
+    getParentRoute: () => AuthenticatedAdminRoute,
+  } as any)
+const AuthenticatedAdminAdminEmailCenterRoute =
+  AuthenticatedAdminAdminEmailCenterRouteImport.update({
+    id: '/admin/email-center',
+    path: '/admin/email-center',
     getParentRoute: () => AuthenticatedAdminRoute,
   } as any)
 const AuthenticatedAdminAdminCouponsRoute =
@@ -327,6 +366,18 @@ const AuthenticatedAdminAdminBooksRoute =
   AuthenticatedAdminAdminBooksRouteImport.update({
     id: '/admin/books',
     path: '/admin/books',
+    getParentRoute: () => AuthenticatedAdminRoute,
+  } as any)
+const AuthenticatedAdminAdminBackupRoute =
+  AuthenticatedAdminAdminBackupRouteImport.update({
+    id: '/admin/backup',
+    path: '/admin/backup',
+    getParentRoute: () => AuthenticatedAdminRoute,
+  } as any)
+const AuthenticatedAdminAdminApiManagerRoute =
+  AuthenticatedAdminAdminApiManagerRouteImport.update({
+    id: '/admin/api-manager',
+    path: '/admin/api-manager',
     getParentRoute: () => AuthenticatedAdminRoute,
   } as any)
 const AuthenticatedAdminAdminAnalyticsRoute =
@@ -399,6 +450,18 @@ const AuthenticatedAdminAdminAiAuditRoute =
   AuthenticatedAdminAdminAiAuditRouteImport.update({
     id: '/admin/ai-audit',
     path: '/admin/ai-audit',
+    getParentRoute: () => AuthenticatedAdminRoute,
+  } as any)
+const AuthenticatedAdminAdminAiRoute =
+  AuthenticatedAdminAdminAiRouteImport.update({
+    id: '/admin/ai',
+    path: '/admin/ai',
+    getParentRoute: () => AuthenticatedAdminRoute,
+  } as any)
+const AuthenticatedAdminAdminActivityLogsRoute =
+  AuthenticatedAdminAdminActivityLogsRouteImport.update({
+    id: '/admin/activity-logs',
+    path: '/admin/activity-logs',
     getParentRoute: () => AuthenticatedAdminRoute,
   } as any)
 const AuthenticatedAppBooksBookIdIndexRoute =
@@ -474,6 +537,8 @@ export interface FileRoutesByFullPath {
   '/settings': typeof AuthenticatedAppSettingsRoute
   '/api/public/paypal-callback': typeof ApiPublicPaypalCallbackRoute
   '/api/public/settings': typeof ApiPublicSettingsRoute
+  '/admin/activity-logs': typeof AuthenticatedAdminAdminActivityLogsRoute
+  '/admin/ai': typeof AuthenticatedAdminAdminAiRoute
   '/admin/ai-audit': typeof AuthenticatedAdminAdminAiAuditRoute
   '/admin/ai-costs': typeof AuthenticatedAdminAdminAiCostsRoute
   '/admin/ai-fallback': typeof AuthenticatedAdminAdminAiFallbackRoute
@@ -486,16 +551,23 @@ export interface FileRoutesByFullPath {
   '/admin/ai-providers': typeof AuthenticatedAdminAdminAiProvidersRoute
   '/admin/ai-routing': typeof AuthenticatedAdminAdminAiRoutingRoute
   '/admin/analytics': typeof AuthenticatedAdminAdminAnalyticsRoute
+  '/admin/api-manager': typeof AuthenticatedAdminAdminApiManagerRoute
+  '/admin/backup': typeof AuthenticatedAdminAdminBackupRoute
   '/admin/books': typeof AuthenticatedAdminAdminBooksRoute
   '/admin/cache': typeof AuthenticatedAdminAdminCacheRoute
   '/admin/coupons': typeof AuthenticatedAdminAdminCouponsRoute
+  '/admin/email-center': typeof AuthenticatedAdminAdminEmailCenterRoute
   '/admin/email-logs': typeof AuthenticatedAdminAdminEmailLogsRoute
   '/admin/email-templates': typeof AuthenticatedAdminAdminEmailTemplatesRoute
+  '/admin/feature-manager': typeof AuthenticatedAdminAdminFeatureManagerRoute
+  '/admin/media': typeof AuthenticatedAdminAdminMediaRoute
   '/admin/messages': typeof AuthenticatedAdminAdminMessagesRoute
   '/admin/orders': typeof AuthenticatedAdminAdminOrdersRoute
   '/admin/payment-gateways': typeof AuthenticatedAdminAdminPaymentGatewaysRoute
   '/admin/plans': typeof AuthenticatedAdminAdminPlansRoute
   '/admin/referrals': typeof AuthenticatedAdminAdminReferralsRoute
+  '/admin/reports': typeof AuthenticatedAdminAdminReportsRoute
+  '/admin/seo': typeof AuthenticatedAdminAdminSeoRoute
   '/admin/settings': typeof AuthenticatedAdminAdminSettingsRoute
   '/admin/support': typeof AuthenticatedAdminAdminSupportRoute
   '/admin/users': typeof AuthenticatedAdminAdminUsersRoute
@@ -539,6 +611,8 @@ export interface FileRoutesByTo {
   '/settings': typeof AuthenticatedAppSettingsRoute
   '/api/public/paypal-callback': typeof ApiPublicPaypalCallbackRoute
   '/api/public/settings': typeof ApiPublicSettingsRoute
+  '/admin/activity-logs': typeof AuthenticatedAdminAdminActivityLogsRoute
+  '/admin/ai': typeof AuthenticatedAdminAdminAiRoute
   '/admin/ai-audit': typeof AuthenticatedAdminAdminAiAuditRoute
   '/admin/ai-costs': typeof AuthenticatedAdminAdminAiCostsRoute
   '/admin/ai-fallback': typeof AuthenticatedAdminAdminAiFallbackRoute
@@ -551,16 +625,23 @@ export interface FileRoutesByTo {
   '/admin/ai-providers': typeof AuthenticatedAdminAdminAiProvidersRoute
   '/admin/ai-routing': typeof AuthenticatedAdminAdminAiRoutingRoute
   '/admin/analytics': typeof AuthenticatedAdminAdminAnalyticsRoute
+  '/admin/api-manager': typeof AuthenticatedAdminAdminApiManagerRoute
+  '/admin/backup': typeof AuthenticatedAdminAdminBackupRoute
   '/admin/books': typeof AuthenticatedAdminAdminBooksRoute
   '/admin/cache': typeof AuthenticatedAdminAdminCacheRoute
   '/admin/coupons': typeof AuthenticatedAdminAdminCouponsRoute
+  '/admin/email-center': typeof AuthenticatedAdminAdminEmailCenterRoute
   '/admin/email-logs': typeof AuthenticatedAdminAdminEmailLogsRoute
   '/admin/email-templates': typeof AuthenticatedAdminAdminEmailTemplatesRoute
+  '/admin/feature-manager': typeof AuthenticatedAdminAdminFeatureManagerRoute
+  '/admin/media': typeof AuthenticatedAdminAdminMediaRoute
   '/admin/messages': typeof AuthenticatedAdminAdminMessagesRoute
   '/admin/orders': typeof AuthenticatedAdminAdminOrdersRoute
   '/admin/payment-gateways': typeof AuthenticatedAdminAdminPaymentGatewaysRoute
   '/admin/plans': typeof AuthenticatedAdminAdminPlansRoute
   '/admin/referrals': typeof AuthenticatedAdminAdminReferralsRoute
+  '/admin/reports': typeof AuthenticatedAdminAdminReportsRoute
+  '/admin/seo': typeof AuthenticatedAdminAdminSeoRoute
   '/admin/settings': typeof AuthenticatedAdminAdminSettingsRoute
   '/admin/support': typeof AuthenticatedAdminAdminSupportRoute
   '/admin/users': typeof AuthenticatedAdminAdminUsersRoute
@@ -608,6 +689,8 @@ export interface FileRoutesById {
   '/_authenticated/_app/settings': typeof AuthenticatedAppSettingsRoute
   '/api/public/paypal-callback': typeof ApiPublicPaypalCallbackRoute
   '/api/public/settings': typeof ApiPublicSettingsRoute
+  '/_authenticated/_admin/admin/activity-logs': typeof AuthenticatedAdminAdminActivityLogsRoute
+  '/_authenticated/_admin/admin/ai': typeof AuthenticatedAdminAdminAiRoute
   '/_authenticated/_admin/admin/ai-audit': typeof AuthenticatedAdminAdminAiAuditRoute
   '/_authenticated/_admin/admin/ai-costs': typeof AuthenticatedAdminAdminAiCostsRoute
   '/_authenticated/_admin/admin/ai-fallback': typeof AuthenticatedAdminAdminAiFallbackRoute
@@ -620,16 +703,23 @@ export interface FileRoutesById {
   '/_authenticated/_admin/admin/ai-providers': typeof AuthenticatedAdminAdminAiProvidersRoute
   '/_authenticated/_admin/admin/ai-routing': typeof AuthenticatedAdminAdminAiRoutingRoute
   '/_authenticated/_admin/admin/analytics': typeof AuthenticatedAdminAdminAnalyticsRoute
+  '/_authenticated/_admin/admin/api-manager': typeof AuthenticatedAdminAdminApiManagerRoute
+  '/_authenticated/_admin/admin/backup': typeof AuthenticatedAdminAdminBackupRoute
   '/_authenticated/_admin/admin/books': typeof AuthenticatedAdminAdminBooksRoute
   '/_authenticated/_admin/admin/cache': typeof AuthenticatedAdminAdminCacheRoute
   '/_authenticated/_admin/admin/coupons': typeof AuthenticatedAdminAdminCouponsRoute
+  '/_authenticated/_admin/admin/email-center': typeof AuthenticatedAdminAdminEmailCenterRoute
   '/_authenticated/_admin/admin/email-logs': typeof AuthenticatedAdminAdminEmailLogsRoute
   '/_authenticated/_admin/admin/email-templates': typeof AuthenticatedAdminAdminEmailTemplatesRoute
+  '/_authenticated/_admin/admin/feature-manager': typeof AuthenticatedAdminAdminFeatureManagerRoute
+  '/_authenticated/_admin/admin/media': typeof AuthenticatedAdminAdminMediaRoute
   '/_authenticated/_admin/admin/messages': typeof AuthenticatedAdminAdminMessagesRoute
   '/_authenticated/_admin/admin/orders': typeof AuthenticatedAdminAdminOrdersRoute
   '/_authenticated/_admin/admin/payment-gateways': typeof AuthenticatedAdminAdminPaymentGatewaysRoute
   '/_authenticated/_admin/admin/plans': typeof AuthenticatedAdminAdminPlansRoute
   '/_authenticated/_admin/admin/referrals': typeof AuthenticatedAdminAdminReferralsRoute
+  '/_authenticated/_admin/admin/reports': typeof AuthenticatedAdminAdminReportsRoute
+  '/_authenticated/_admin/admin/seo': typeof AuthenticatedAdminAdminSeoRoute
   '/_authenticated/_admin/admin/settings': typeof AuthenticatedAdminAdminSettingsRoute
   '/_authenticated/_admin/admin/support': typeof AuthenticatedAdminAdminSupportRoute
   '/_authenticated/_admin/admin/users': typeof AuthenticatedAdminAdminUsersRoute
@@ -675,6 +765,8 @@ export interface FileRouteTypes {
     | '/settings'
     | '/api/public/paypal-callback'
     | '/api/public/settings'
+    | '/admin/activity-logs'
+    | '/admin/ai'
     | '/admin/ai-audit'
     | '/admin/ai-costs'
     | '/admin/ai-fallback'
@@ -687,16 +779,23 @@ export interface FileRouteTypes {
     | '/admin/ai-providers'
     | '/admin/ai-routing'
     | '/admin/analytics'
+    | '/admin/api-manager'
+    | '/admin/backup'
     | '/admin/books'
     | '/admin/cache'
     | '/admin/coupons'
+    | '/admin/email-center'
     | '/admin/email-logs'
     | '/admin/email-templates'
+    | '/admin/feature-manager'
+    | '/admin/media'
     | '/admin/messages'
     | '/admin/orders'
     | '/admin/payment-gateways'
     | '/admin/plans'
     | '/admin/referrals'
+    | '/admin/reports'
+    | '/admin/seo'
     | '/admin/settings'
     | '/admin/support'
     | '/admin/users'
@@ -740,6 +839,8 @@ export interface FileRouteTypes {
     | '/settings'
     | '/api/public/paypal-callback'
     | '/api/public/settings'
+    | '/admin/activity-logs'
+    | '/admin/ai'
     | '/admin/ai-audit'
     | '/admin/ai-costs'
     | '/admin/ai-fallback'
@@ -752,16 +853,23 @@ export interface FileRouteTypes {
     | '/admin/ai-providers'
     | '/admin/ai-routing'
     | '/admin/analytics'
+    | '/admin/api-manager'
+    | '/admin/backup'
     | '/admin/books'
     | '/admin/cache'
     | '/admin/coupons'
+    | '/admin/email-center'
     | '/admin/email-logs'
     | '/admin/email-templates'
+    | '/admin/feature-manager'
+    | '/admin/media'
     | '/admin/messages'
     | '/admin/orders'
     | '/admin/payment-gateways'
     | '/admin/plans'
     | '/admin/referrals'
+    | '/admin/reports'
+    | '/admin/seo'
     | '/admin/settings'
     | '/admin/support'
     | '/admin/users'
@@ -808,6 +916,8 @@ export interface FileRouteTypes {
     | '/_authenticated/_app/settings'
     | '/api/public/paypal-callback'
     | '/api/public/settings'
+    | '/_authenticated/_admin/admin/activity-logs'
+    | '/_authenticated/_admin/admin/ai'
     | '/_authenticated/_admin/admin/ai-audit'
     | '/_authenticated/_admin/admin/ai-costs'
     | '/_authenticated/_admin/admin/ai-fallback'
@@ -820,16 +930,23 @@ export interface FileRouteTypes {
     | '/_authenticated/_admin/admin/ai-providers'
     | '/_authenticated/_admin/admin/ai-routing'
     | '/_authenticated/_admin/admin/analytics'
+    | '/_authenticated/_admin/admin/api-manager'
+    | '/_authenticated/_admin/admin/backup'
     | '/_authenticated/_admin/admin/books'
     | '/_authenticated/_admin/admin/cache'
     | '/_authenticated/_admin/admin/coupons'
+    | '/_authenticated/_admin/admin/email-center'
     | '/_authenticated/_admin/admin/email-logs'
     | '/_authenticated/_admin/admin/email-templates'
+    | '/_authenticated/_admin/admin/feature-manager'
+    | '/_authenticated/_admin/admin/media'
     | '/_authenticated/_admin/admin/messages'
     | '/_authenticated/_admin/admin/orders'
     | '/_authenticated/_admin/admin/payment-gateways'
     | '/_authenticated/_admin/admin/plans'
     | '/_authenticated/_admin/admin/referrals'
+    | '/_authenticated/_admin/admin/reports'
+    | '/_authenticated/_admin/admin/seo'
     | '/_authenticated/_admin/admin/settings'
     | '/_authenticated/_admin/admin/support'
     | '/_authenticated/_admin/admin/users'
@@ -1124,6 +1241,20 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedAdminAdminSettingsRouteImport
       parentRoute: typeof AuthenticatedAdminRoute
     }
+    '/_authenticated/_admin/admin/seo': {
+      id: '/_authenticated/_admin/admin/seo'
+      path: '/admin/seo'
+      fullPath: '/admin/seo'
+      preLoaderRoute: typeof AuthenticatedAdminAdminSeoRouteImport
+      parentRoute: typeof AuthenticatedAdminRoute
+    }
+    '/_authenticated/_admin/admin/reports': {
+      id: '/_authenticated/_admin/admin/reports'
+      path: '/admin/reports'
+      fullPath: '/admin/reports'
+      preLoaderRoute: typeof AuthenticatedAdminAdminReportsRouteImport
+      parentRoute: typeof AuthenticatedAdminRoute
+    }
     '/_authenticated/_admin/admin/referrals': {
       id: '/_authenticated/_admin/admin/referrals'
       path: '/admin/referrals'
@@ -1159,6 +1290,20 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedAdminAdminMessagesRouteImport
       parentRoute: typeof AuthenticatedAdminRoute
     }
+    '/_authenticated/_admin/admin/media': {
+      id: '/_authenticated/_admin/admin/media'
+      path: '/admin/media'
+      fullPath: '/admin/media'
+      preLoaderRoute: typeof AuthenticatedAdminAdminMediaRouteImport
+      parentRoute: typeof AuthenticatedAdminRoute
+    }
+    '/_authenticated/_admin/admin/feature-manager': {
+      id: '/_authenticated/_admin/admin/feature-manager'
+      path: '/admin/feature-manager'
+      fullPath: '/admin/feature-manager'
+      preLoaderRoute: typeof AuthenticatedAdminAdminFeatureManagerRouteImport
+      parentRoute: typeof AuthenticatedAdminRoute
+    }
     '/_authenticated/_admin/admin/email-templates': {
       id: '/_authenticated/_admin/admin/email-templates'
       path: '/admin/email-templates'
@@ -1171,6 +1316,13 @@ declare module '@tanstack/react-router' {
       path: '/admin/email-logs'
       fullPath: '/admin/email-logs'
       preLoaderRoute: typeof AuthenticatedAdminAdminEmailLogsRouteImport
+      parentRoute: typeof AuthenticatedAdminRoute
+    }
+    '/_authenticated/_admin/admin/email-center': {
+      id: '/_authenticated/_admin/admin/email-center'
+      path: '/admin/email-center'
+      fullPath: '/admin/email-center'
+      preLoaderRoute: typeof AuthenticatedAdminAdminEmailCenterRouteImport
       parentRoute: typeof AuthenticatedAdminRoute
     }
     '/_authenticated/_admin/admin/coupons': {
@@ -1192,6 +1344,20 @@ declare module '@tanstack/react-router' {
       path: '/admin/books'
       fullPath: '/admin/books'
       preLoaderRoute: typeof AuthenticatedAdminAdminBooksRouteImport
+      parentRoute: typeof AuthenticatedAdminRoute
+    }
+    '/_authenticated/_admin/admin/backup': {
+      id: '/_authenticated/_admin/admin/backup'
+      path: '/admin/backup'
+      fullPath: '/admin/backup'
+      preLoaderRoute: typeof AuthenticatedAdminAdminBackupRouteImport
+      parentRoute: typeof AuthenticatedAdminRoute
+    }
+    '/_authenticated/_admin/admin/api-manager': {
+      id: '/_authenticated/_admin/admin/api-manager'
+      path: '/admin/api-manager'
+      fullPath: '/admin/api-manager'
+      preLoaderRoute: typeof AuthenticatedAdminAdminApiManagerRouteImport
       parentRoute: typeof AuthenticatedAdminRoute
     }
     '/_authenticated/_admin/admin/analytics': {
@@ -1278,6 +1444,20 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedAdminAdminAiAuditRouteImport
       parentRoute: typeof AuthenticatedAdminRoute
     }
+    '/_authenticated/_admin/admin/ai': {
+      id: '/_authenticated/_admin/admin/ai'
+      path: '/admin/ai'
+      fullPath: '/admin/ai'
+      preLoaderRoute: typeof AuthenticatedAdminAdminAiRouteImport
+      parentRoute: typeof AuthenticatedAdminRoute
+    }
+    '/_authenticated/_admin/admin/activity-logs': {
+      id: '/_authenticated/_admin/admin/activity-logs'
+      path: '/admin/activity-logs'
+      fullPath: '/admin/activity-logs'
+      preLoaderRoute: typeof AuthenticatedAdminAdminActivityLogsRouteImport
+      parentRoute: typeof AuthenticatedAdminRoute
+    }
     '/_authenticated/_app/books/$bookId/': {
       id: '/_authenticated/_app/books/$bookId/'
       path: '/books/$bookId'
@@ -1338,6 +1518,8 @@ declare module '@tanstack/react-router' {
 }
 
 interface AuthenticatedAdminRouteChildren {
+  AuthenticatedAdminAdminActivityLogsRoute: typeof AuthenticatedAdminAdminActivityLogsRoute
+  AuthenticatedAdminAdminAiRoute: typeof AuthenticatedAdminAdminAiRoute
   AuthenticatedAdminAdminAiAuditRoute: typeof AuthenticatedAdminAdminAiAuditRoute
   AuthenticatedAdminAdminAiCostsRoute: typeof AuthenticatedAdminAdminAiCostsRoute
   AuthenticatedAdminAdminAiFallbackRoute: typeof AuthenticatedAdminAdminAiFallbackRoute
@@ -1350,16 +1532,23 @@ interface AuthenticatedAdminRouteChildren {
   AuthenticatedAdminAdminAiProvidersRoute: typeof AuthenticatedAdminAdminAiProvidersRoute
   AuthenticatedAdminAdminAiRoutingRoute: typeof AuthenticatedAdminAdminAiRoutingRoute
   AuthenticatedAdminAdminAnalyticsRoute: typeof AuthenticatedAdminAdminAnalyticsRoute
+  AuthenticatedAdminAdminApiManagerRoute: typeof AuthenticatedAdminAdminApiManagerRoute
+  AuthenticatedAdminAdminBackupRoute: typeof AuthenticatedAdminAdminBackupRoute
   AuthenticatedAdminAdminBooksRoute: typeof AuthenticatedAdminAdminBooksRoute
   AuthenticatedAdminAdminCacheRoute: typeof AuthenticatedAdminAdminCacheRoute
   AuthenticatedAdminAdminCouponsRoute: typeof AuthenticatedAdminAdminCouponsRoute
+  AuthenticatedAdminAdminEmailCenterRoute: typeof AuthenticatedAdminAdminEmailCenterRoute
   AuthenticatedAdminAdminEmailLogsRoute: typeof AuthenticatedAdminAdminEmailLogsRoute
   AuthenticatedAdminAdminEmailTemplatesRoute: typeof AuthenticatedAdminAdminEmailTemplatesRoute
+  AuthenticatedAdminAdminFeatureManagerRoute: typeof AuthenticatedAdminAdminFeatureManagerRoute
+  AuthenticatedAdminAdminMediaRoute: typeof AuthenticatedAdminAdminMediaRoute
   AuthenticatedAdminAdminMessagesRoute: typeof AuthenticatedAdminAdminMessagesRoute
   AuthenticatedAdminAdminOrdersRoute: typeof AuthenticatedAdminAdminOrdersRoute
   AuthenticatedAdminAdminPaymentGatewaysRoute: typeof AuthenticatedAdminAdminPaymentGatewaysRoute
   AuthenticatedAdminAdminPlansRoute: typeof AuthenticatedAdminAdminPlansRoute
   AuthenticatedAdminAdminReferralsRoute: typeof AuthenticatedAdminAdminReferralsRoute
+  AuthenticatedAdminAdminReportsRoute: typeof AuthenticatedAdminAdminReportsRoute
+  AuthenticatedAdminAdminSeoRoute: typeof AuthenticatedAdminAdminSeoRoute
   AuthenticatedAdminAdminSettingsRoute: typeof AuthenticatedAdminAdminSettingsRoute
   AuthenticatedAdminAdminSupportRoute: typeof AuthenticatedAdminAdminSupportRoute
   AuthenticatedAdminAdminUsersRoute: typeof AuthenticatedAdminAdminUsersRoute
@@ -1370,6 +1559,9 @@ interface AuthenticatedAdminRouteChildren {
 }
 
 const AuthenticatedAdminRouteChildren: AuthenticatedAdminRouteChildren = {
+  AuthenticatedAdminAdminActivityLogsRoute:
+    AuthenticatedAdminAdminActivityLogsRoute,
+  AuthenticatedAdminAdminAiRoute: AuthenticatedAdminAdminAiRoute,
   AuthenticatedAdminAdminAiAuditRoute: AuthenticatedAdminAdminAiAuditRoute,
   AuthenticatedAdminAdminAiCostsRoute: AuthenticatedAdminAdminAiCostsRoute,
   AuthenticatedAdminAdminAiFallbackRoute:
@@ -1385,18 +1577,28 @@ const AuthenticatedAdminRouteChildren: AuthenticatedAdminRouteChildren = {
     AuthenticatedAdminAdminAiProvidersRoute,
   AuthenticatedAdminAdminAiRoutingRoute: AuthenticatedAdminAdminAiRoutingRoute,
   AuthenticatedAdminAdminAnalyticsRoute: AuthenticatedAdminAdminAnalyticsRoute,
+  AuthenticatedAdminAdminApiManagerRoute:
+    AuthenticatedAdminAdminApiManagerRoute,
+  AuthenticatedAdminAdminBackupRoute: AuthenticatedAdminAdminBackupRoute,
   AuthenticatedAdminAdminBooksRoute: AuthenticatedAdminAdminBooksRoute,
   AuthenticatedAdminAdminCacheRoute: AuthenticatedAdminAdminCacheRoute,
   AuthenticatedAdminAdminCouponsRoute: AuthenticatedAdminAdminCouponsRoute,
+  AuthenticatedAdminAdminEmailCenterRoute:
+    AuthenticatedAdminAdminEmailCenterRoute,
   AuthenticatedAdminAdminEmailLogsRoute: AuthenticatedAdminAdminEmailLogsRoute,
   AuthenticatedAdminAdminEmailTemplatesRoute:
     AuthenticatedAdminAdminEmailTemplatesRoute,
+  AuthenticatedAdminAdminFeatureManagerRoute:
+    AuthenticatedAdminAdminFeatureManagerRoute,
+  AuthenticatedAdminAdminMediaRoute: AuthenticatedAdminAdminMediaRoute,
   AuthenticatedAdminAdminMessagesRoute: AuthenticatedAdminAdminMessagesRoute,
   AuthenticatedAdminAdminOrdersRoute: AuthenticatedAdminAdminOrdersRoute,
   AuthenticatedAdminAdminPaymentGatewaysRoute:
     AuthenticatedAdminAdminPaymentGatewaysRoute,
   AuthenticatedAdminAdminPlansRoute: AuthenticatedAdminAdminPlansRoute,
   AuthenticatedAdminAdminReferralsRoute: AuthenticatedAdminAdminReferralsRoute,
+  AuthenticatedAdminAdminReportsRoute: AuthenticatedAdminAdminReportsRoute,
+  AuthenticatedAdminAdminSeoRoute: AuthenticatedAdminAdminSeoRoute,
   AuthenticatedAdminAdminSettingsRoute: AuthenticatedAdminAdminSettingsRoute,
   AuthenticatedAdminAdminSupportRoute: AuthenticatedAdminAdminSupportRoute,
   AuthenticatedAdminAdminUsersRoute: AuthenticatedAdminAdminUsersRoute,
