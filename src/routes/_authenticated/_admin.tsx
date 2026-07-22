@@ -21,7 +21,6 @@ import {
   Gift,
   Trash2,
   Layers,
-  Route as RouteIcon,
   GitBranch,
   HeartPulse,
   DollarSign,

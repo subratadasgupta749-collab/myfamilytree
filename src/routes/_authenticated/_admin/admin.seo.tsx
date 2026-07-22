@@ -1,7 +1,7 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { useState } from "react";
-import { Globe, Search, Route as RouteIcon, FileCode, Bot, Save, Plus, Trash2, Check, RefreshCw } from "lucide-react";
+import { Globe, Search, GitBranch, FileCode, Bot, Save, Plus, Trash2, Check, RefreshCw } from "lucide-react";
 import { listSeoConfigs, updateSeoConfig } from "@/lib/system.functions";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -70,7 +70,7 @@ function AdminSeoPage() {
             <Globe className="mr-2 h-3.5 w-3.5" /> Page Metadata
           </TabsTrigger>
           <TabsTrigger value="redirects" className="rounded-xl px-4 text-xs font-semibold">
-            <RouteIcon className="mr-2 h-3.5 w-3.5" /> 301 Redirects
+            <GitBranch className="mr-2 h-3.5 w-3.5" /> 301 Redirects
           </TabsTrigger>
           <TabsTrigger value="robots" className="rounded-xl px-4 text-xs font-semibold">
             <Bot className="mr-2 h-3.5 w-3.5" /> robots.txt & llms.txt
