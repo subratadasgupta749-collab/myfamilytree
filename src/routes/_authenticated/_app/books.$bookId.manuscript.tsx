@@ -67,12 +67,18 @@ function ManuscriptPage() {
     onError: (e: Error) => toast.error(e.message),
   });
 
-  if (isLoading || !data) {
-    return <div className="mx-auto max-w-4xl text-center text-muted-foreground">Loading…</div>;
+  if (isLoading) {
+    return (
+      <div className="flex flex-col items-center justify-center py-20 text-muted-foreground gap-3">
+        <Loader2 className="h-8 w-8 animate-spin text-primary" />
+        <span className="text-sm font-medium">Loading Manuscript...</span>
+      </div>
+    );
   }
 
-  const theme = (data.manuscript?.theme ?? "classic") as BookThemeId;
-  const hasContent = (data.chapters?.length ?? 0) > 0;
+  const manuscriptData = data ?? { manuscript: null, chapters: [] };
+  const theme = (manuscriptData.manuscript?.theme ?? "classic") as BookThemeId;
+  const hasContent = (manuscriptData.chapters?.length ?? 0) > 0;
 
   return (
     <div className="mx-auto max-w-4xl">

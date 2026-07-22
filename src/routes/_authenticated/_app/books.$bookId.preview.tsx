@@ -151,12 +151,18 @@ function PreviewPage() {
     onError: (e: Error) => toast.error(e.message),
   });
 
-  if (bookQuery.isLoading || manuscriptQuery.isLoading || !bookQuery.data || !manuscriptQuery.data) {
-    return <div className="mx-auto max-w-4xl text-center text-muted-foreground">Loading…</div>;
+  if (bookQuery.isLoading || manuscriptQuery.isLoading) {
+    return (
+      <div className="flex flex-col items-center justify-center py-20 text-muted-foreground gap-3">
+        <Loader2 className="h-8 w-8 animate-spin text-primary" />
+        <span className="text-sm font-medium">Loading Book Preview...</span>
+      </div>
+    );
   }
 
-  const book = bookQuery.data;
-  const { manuscript, chapters } = manuscriptQuery.data;
+  const book = bookQuery.data ?? { name: "Family Book" };
+  const manuscriptData = manuscriptQuery.data ?? { manuscript: null, chapters: [] };
+  const { manuscript, chapters } = manuscriptData;
   const themeId = (manuscript?.theme ?? "classic") as BookThemeId;
   const theme = themeStyles[themeId] ?? themeStyles.classic;
   const themeMeta = BOOK_THEMES.find((t) => t.id === themeId);
