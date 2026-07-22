@@ -1,6 +1,6 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Globe, Search, GitBranch, FileCode, Bot, Save, Plus, Trash2, Check, RefreshCw } from "lucide-react";
 import { listSeoConfigs, updateSeoConfig } from "@/lib/system.functions";
 import { Card } from "@/components/ui/card";
@@ -8,6 +8,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
+import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import { AdminPageHeader } from "@/components/admin/table-controls";
 import { toast } from "sonner";
@@ -36,6 +37,17 @@ function AdminSeoPage() {
   const [description, setDescription] = useState("AI guided interview assistant to turn your parents' and grandparents' stories into beautiful printed hardcover books.");
   const [ogImage, setOgImage] = useState("/og-image.png");
 
+  useEffect(() => {
+    if (seoPages && seoPages.length > 0) {
+      const match = (seoPages as any[]).find((p: any) => p.page_key === selectedPage);
+      if (match) {
+        setTitle(match.title || "");
+        setDescription(match.description || "");
+        setOgImage(match.og_image || "/og-image.png");
+      }
+    }
+  }, [selectedPage, seoPages]);
+
   const saveSeoMutation = useMutation({
     mutationFn: () =>
       updateSeoConfig({
@@ -50,7 +62,7 @@ function AdminSeoPage() {
       toast.success("SEO Configuration saved");
       queryClient.invalidateQueries({ queryKey: ["admin-seo-configs"] });
     },
-    onError: (e: any) => toast.error(e.message),
+    onError: (e: any) => toast.error(e.message || "Failed to save SEO config"),
   });
 
   // Robots & LLMs state
