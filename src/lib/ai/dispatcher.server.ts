@@ -407,12 +407,55 @@ export async function runAi(opts: AiCallOptions): Promise<AiCallResult> {
   throw new Error(`All AI providers failed. Last error: ${lastError}`);
 }
 
+const DEFAULT_PROMPTS: Record<string, { system: string; user_template: string }> = {
+  biography_chapter: {
+    system: "You are a professional biographer crafting a warm, engaging family history book chapter in valid JSON format.",
+    user_template: `Subject: {{subject}}
+Chapter {{index}} of {{total}}
+Topic: {{topic}}
+Interview Q&A:
+{{qa_text}}
+
+Write a complete biography chapter based on these interview answers. Return JSON ONLY with the following structure:
+{
+  "title": "Chapter title",
+  "narrative": "Detailed narrative story in multi-paragraph prose...",
+  "timeline": [{"year": "1990", "event": "Event description"}],
+  "quotes": ["Memorable quote..."]
+}`,
+  },
+  biography_intro: {
+    system: "You are an eloquent biographer writing an introduction for a family history book.",
+    user_template: `Subject: {{subject}}
+Overview of covered topics: {{overview}}
+
+Write a warm, touching 2-3 paragraph introduction to this family history book. Return JSON ONLY: {"text": "..."}`,
+  },
+  biography_ending: {
+    system: "You are a thoughtful biographer writing the closing message for a family history book.",
+    user_template: `Subject: {{subject}}
+
+Write a meaningful 2-3 paragraph closing reflection and message for the family book. Return JSON ONLY: {"text": "..."}`,
+  },
+};
+
 export async function renderPrompt(key: string, vars: Record<string, string>): Promise<{ system: string | null; user: string }> {
-  const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
-  const { data, error } = await supabaseAdmin.from("ai_prompts").select("system_prompt, user_template").eq("key", key).maybeSingle();
-  if (error) throw new Error(error.message);
-  if (!data) throw new Error(`Prompt "${key}" is not configured.`);
-  const interp = (s: string | null) =>
-    (s ?? "").replace(/\{\{\s*([\w.]+)\s*\}\}/g, (_m, k: string) => vars[k] ?? "");
-  return { system: data.system_prompt ? interp(data.system_prompt) : null, user: interp(data.user_template) };
+  try {
+    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+    const { data, error } = await supabaseAdmin.from("ai_prompts").select("system_prompt, user_template").eq("key", key).maybeSingle();
+    if (!error && data?.user_template) {
+      const interp = (s: string | null) =>
+        (s ?? "").replace(/\{\{\s*([\w.]+)\s*\}\}/g, (_m, k: string) => vars[k] ?? "");
+      return { system: data.system_prompt ? interp(data.system_prompt) : null, user: interp(data.user_template) };
+    }
+  } catch {}
+
+  const fallback = DEFAULT_PROMPTS[key];
+  if (fallback) {
+    const interp = (s: string | null) =>
+      (s ?? "").replace(/\{\{\s*([\w.]+)\s*\}\}/g, (_m, k: string) => vars[k] ?? "");
+    return { system: fallback.system ? interp(fallback.system) : null, user: interp(fallback.user_template) };
+  }
+
+  throw new Error(`Prompt "${key}" is not configured.`);
 }

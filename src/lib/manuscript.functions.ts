@@ -36,20 +36,25 @@ export const getManuscript = createServerFn({ method: "GET" })
       if (!data?.bookId) return { manuscript: null, chapters: [] };
       await ensureBookAccess(context.supabase, data.bookId);
 
-      const { data: manuscript } = await context.supabase
+      const { data: manuscript, error: mErr } = await context.supabase
         .from("book_manuscripts")
         .select("*")
         .eq("book_id", data.bookId)
         .maybeSingle();
 
-      const { data: chapters } = await context.supabase
+      if (mErr) console.error("[getManuscript] Error fetching manuscript:", mErr);
+
+      const { data: chapters, error: cErr } = await context.supabase
         .from("book_chapters")
         .select("*")
         .eq("book_id", data.bookId)
         .order("position");
 
+      if (cErr) console.error("[getManuscript] Error fetching chapters:", cErr);
+
       return { manuscript: manuscript ?? null, chapters: chapters ?? [] };
-    } catch {
+    } catch (err) {
+      console.error("[getManuscript] Error:", err);
       return { manuscript: null, chapters: [] };
     }
   });
@@ -179,12 +184,21 @@ export const generateBook = createServerFn({ method: "POST" })
 
     const byTopic = new Map<string, Array<{ question: string; answer: string }>>();
     for (const row of answered) {
-      const arr = byTopic.get(row.topic) ?? [];
+      const topicKey = row.topic || "General";
+      const arr = byTopic.get(topicKey) ?? [];
       arr.push({ question: row.question, answer: row.answer });
-      byTopic.set(row.topic, arr);
+      byTopic.set(topicKey, arr);
     }
 
-    const topicsWithAnswers = INTERVIEW_TOPICS.filter((t) => byTopic.has(t));
+    const topicOrderMap = new Map<string, number>(
+      INTERVIEW_TOPICS.map((t, idx) => [t.toLowerCase(), idx])
+    );
+
+    const topicsWithAnswers = Array.from(byTopic.keys()).sort((a, b) => {
+      const idxA = topicOrderMap.get(a.toLowerCase()) ?? 999;
+      const idxB = topicOrderMap.get(b.toLowerCase()) ?? 999;
+      return idxA - idxB;
+    });
 
     // Ensure manuscript row exists
     await context.supabase
@@ -200,27 +214,48 @@ export const generateBook = createServerFn({ method: "POST" })
       const qa = byTopic.get(topic)!;
       const qaText = qa.map((q, idx) => `Q${idx + 1}: ${q.question}\nA${idx + 1}: ${q.answer}`).join("\n\n");
 
-      const raw = await callAi(
-        "biography_chapter",
-        {
-          subject,
-          index: String(i + 1),
-          total: String(topicsWithAnswers.length),
-          topic,
-          qa_text: qaText,
-        },
-        { userId: context.userId, bookId: data.bookId },
-      );
+      let raw = "";
+      try {
+        raw = await callAi(
+          "biography_chapter",
+          {
+            subject,
+            index: String(i + 1),
+            total: String(topicsWithAnswers.length),
+            topic,
+            qa_text: qaText,
+          },
+          { userId: context.userId, bookId: data.bookId },
+        );
+      } catch (e) {
+        console.warn(`[generateBook] AI call failed for chapter "${topic}", using Q&A fallback:`, e);
+      }
+
       let parsed: {
         title: string;
         narrative: string;
         timeline: Array<{ year: string; event: string }>;
         quotes: string[];
       };
-      try {
-        parsed = extractJson(raw);
-      } catch {
-        parsed = { title: topic, narrative: raw, timeline: [], quotes: [] };
+
+      if (raw) {
+        try {
+          parsed = extractJson(raw);
+        } catch {
+          parsed = { title: topic, narrative: raw, timeline: [], quotes: [] };
+        }
+      } else {
+        const narrativeText = qa.map((q) => `${q.question}\n${q.answer}`).join("\n\n");
+        const extractedQuotes = qa
+          .map((q) => q.answer.trim())
+          .filter((a) => a.length > 15)
+          .slice(0, 3);
+        parsed = {
+          title: topic,
+          narrative: narrativeText,
+          timeline: [],
+          quotes: extractedQuotes,
+        };
       }
 
       await context.supabase.from("book_chapters").upsert(
@@ -243,13 +278,32 @@ export const generateBook = createServerFn({ method: "POST" })
       .map((t) => `${t}: ${byTopic.get(t)!.length} answers`)
       .join("; ");
 
-    const introRaw = await callAi("biography_intro", { subject, overview }, { userId: context.userId, bookId: data.bookId });
-    const endingRaw = await callAi("biography_ending", { subject }, { userId: context.userId, bookId: data.bookId });
+    let introRaw = "";
+    let endingRaw = "";
+    try {
+      introRaw = await callAi("biography_intro", { subject, overview }, { userId: context.userId, bookId: data.bookId });
+    } catch (e) {
+      console.warn("[generateBook] Intro AI failed, using fallback:", e);
+    }
+    try {
+      endingRaw = await callAi("biography_ending", { subject }, { userId: context.userId, bookId: data.bookId });
+    } catch (e) {
+      console.warn("[generateBook] Ending AI failed, using fallback:", e);
+    }
 
     let introduction = "";
     let ending = "";
-    try { introduction = extractJson<{ text: string }>(introRaw).text ?? introRaw; } catch { introduction = introRaw; }
-    try { ending = extractJson<{ text: string }>(endingRaw).text ?? endingRaw; } catch { ending = endingRaw; }
+    if (introRaw) {
+      try { introduction = extractJson<{ text: string }>(introRaw).text ?? introRaw; } catch { introduction = introRaw; }
+    } else {
+      introduction = `Welcome to the life story and biography of ${book.name}. This collection of memories, milestones, and personal reflections preserves a rich legacy for generations to come.`;
+    }
+
+    if (endingRaw) {
+      try { ending = extractJson<{ text: string }>(endingRaw).text ?? endingRaw; } catch { ending = endingRaw; }
+    } else {
+      ending = `Thank you for taking the time to share these cherished stories and memories. May this book serve as a meaningful keepsake for family and loved ones.`;
+    }
 
     await context.supabase
       .from("book_manuscripts")
