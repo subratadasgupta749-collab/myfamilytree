@@ -211,8 +211,10 @@ async function callOpenAiCompatible(
 }
 
 async function callGemini(row: ProviderRow, apiKey: string, model: string, opts: AiCallOptions) {
+  const cleanApiKey = apiKey.trim().replace(/^["']|["']$/g, "");
   const base = (row.base_url ?? "https://generativelanguage.googleapis.com").replace(/\/+$/, "");
-  const url = `${base}/v1beta/models/${encodeURIComponent(model)}:generateContent?key=${encodeURIComponent(apiKey)}`;
+  const effectiveModel = (!model || model === "gemini-2.5-flash") ? "gemini-1.5-flash" : model;
+  const url = `${base}/v1beta/models/${encodeURIComponent(effectiveModel)}:generateContent?key=${encodeURIComponent(cleanApiKey)}`;
   const body: Record<string, unknown> = {
     contents: [{ role: "user", parts: [{ text: opts.user }] }],
     generationConfig: {
@@ -224,10 +226,16 @@ async function callGemini(row: ProviderRow, apiKey: string, model: string, opts:
   const sys = opts.system ?? row.system_prompt;
   if (sys) body.systemInstruction = { parts: [{ text: sys }] };
   const ctrl = new AbortController();
-  const timeout = setTimeout(() => ctrl.abort(), row.timeout_ms);
+  const timeout = setTimeout(() => ctrl.abort(), row.timeout_ms || 60000);
   try {
     const res = await fetch(url, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(body), signal: ctrl.signal });
-    if (!res.ok) { const t = await res.text(); throw new Error(`[${res.status}] ${t.slice(0, 300)}`); }
+    if (!res.ok) {
+      const t = await res.text();
+      if (t.includes("API_KEY_INVALID") || t.includes("API key not valid")) {
+        throw new Error(`Google Gemini: API key not valid. Please paste a valid API key from Google AI Studio (https://aistudio.google.com) in Admin → API Vault.`);
+      }
+      throw new Error(`[${res.status}] ${t.slice(0, 300)}`);
+    }
     const json = (await res.json()) as any;
     const text = json.candidates?.[0]?.content?.parts?.map((p: any) => p.text ?? "").join("").trim() ?? "";
     if (!text) throw new Error("Empty response from Gemini.");
@@ -263,8 +271,19 @@ async function callAnthropic(row: ProviderRow, apiKey: string, model: string, op
 
 async function callProvider(row: ProviderRow, opts: AiCallOptions): Promise<AiCallResult> {
   const isLovable = row.provider_type === "lovable";
-  const apiKey = isLovable ? (decryptKey(row) ?? process.env.LOVABLE_API_KEY ?? "") : decryptKey(row);
-  if (!apiKey) throw new Error(`${row.name}: no API key configured.`);
+  let apiKey = isLovable ? (decryptKey(row) ?? cleanKey(process.env.LOVABLE_API_KEY)) : decryptKey(row);
+
+  if (!apiKey) {
+    if (row.slug === "gemini") apiKey = cleanKey(process.env.GEMINI_API_KEY || process.env.VITE_GEMINI_API_KEY);
+    else if (row.slug === "openai") apiKey = cleanKey(process.env.OPENAI_API_KEY);
+    else if (row.slug === "openrouter") apiKey = cleanKey(process.env.OPENROUTER_API_KEY);
+    else if (row.slug === "deepseek") apiKey = cleanKey(process.env.DEEPSEEK_API_KEY);
+  }
+
+  if (!apiKey) {
+    throw new Error(`${row.name}: No API key configured. Please enter a valid API key in Admin → API Vault or AI Center.`);
+  }
+
   const model = opts.model || row.default_model;
   if (!model) throw new Error(`${row.name}: no model configured.`);
 
