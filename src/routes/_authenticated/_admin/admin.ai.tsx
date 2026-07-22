@@ -171,15 +171,15 @@ function AdminAiCenterPage() {
             <div className="grid gap-4 sm:grid-cols-3">
               <div className="p-4 rounded-xl bg-slate-50 border">
                 <div className="text-xs text-muted-foreground">This Month's Spending</div>
-                <div className="text-2xl font-bold font-serif text-[color:var(--ink)]">$38.50</div>
+                <div className="text-2xl font-bold font-serif text-[color:var(--ink)]">$0.00</div>
               </div>
               <div className="p-4 rounded-xl bg-slate-50 border">
                 <div className="text-xs text-muted-foreground">Total Tokens Processed</div>
-                <div className="text-2xl font-bold font-serif text-[color:var(--ink)]">1.42M</div>
+                <div className="text-2xl font-bold font-serif text-[color:var(--ink)]">0 Tokens</div>
               </div>
               <div className="p-4 rounded-xl bg-slate-50 border">
                 <div className="text-xs text-muted-foreground">Cost per Generated Book</div>
-                <div className="text-2xl font-bold font-serif text-[color:var(--ink)]">$0.34</div>
+                <div className="text-2xl font-bold font-serif text-[color:var(--ink)]">$0.00</div>
               </div>
             </div>
           </Card>
@@ -189,19 +189,8 @@ function AdminAiCenterPage() {
         <TabsContent value="logs">
           <Card className="p-6 space-y-4 rounded-2xl bg-white border-border/60 shadow-2xs">
             <h3 className="font-serif text-lg font-semibold text-[color:var(--ink)]">Recent Invocations Log</h3>
-            <div className="space-y-2 text-xs">
-              <div className="flex justify-between p-3 rounded-lg bg-muted/30 border">
-                <div>
-                  <span className="font-mono font-bold text-primary">Gemini 1.5 Pro</span> — Interview question generation
-                </div>
-                <div className="text-muted-foreground">240ms · 410 tokens · $0.002</div>
-              </div>
-              <div className="flex justify-between p-3 rounded-lg bg-muted/30 border">
-                <div>
-                  <span className="font-mono font-bold text-primary">GPT-4o</span> — Chapter manuscript formatting
-                </div>
-                <div className="text-muted-foreground">580ms · 1,240 tokens · $0.012</div>
-              </div>
+            <div className="py-8 text-center text-xs text-muted-foreground border border-dashed rounded-xl">
+              No AI invocations logged yet.
             </div>
           </Card>
         </TabsContent>

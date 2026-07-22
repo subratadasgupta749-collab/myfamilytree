@@ -11,19 +11,16 @@ import {
   Sparkles,
   Cpu,
   CreditCard,
-  Plus,
-  ArrowUpRight,
   TrendingUp,
-  Clock,
   Shield,
   Activity,
-  UserCheck,
 } from "lucide-react";
 import { getOverview } from "@/lib/admin.functions";
-import { generateAdminReportData } from "@/lib/system.functions";
+import { generateAdminReportData, getAdminDashboardStreams } from "@/lib/system.functions";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
+import { formatDistanceToNow } from "date-fns";
 
 export const Route = createFileRoute("/_authenticated/_admin/admin/")({
   head: () => ({
@@ -45,6 +42,14 @@ function AdminDashboardIndex() {
     queryKey: ["admin-report-summary"],
     queryFn: () => generateAdminReportData(),
   });
+
+  const { data: streams } = useQuery({
+    queryKey: ["admin-dashboard-streams"],
+    queryFn: () => getAdminDashboardStreams(),
+  });
+
+  const totalRevenue = reports?.revenueTotal ?? stats?.revenue?.total ?? 0;
+  const currencySymbol = stats?.revenue?.currency === "INR" ? "₹" : "$";
 
   return (
     <div className="space-y-8 animate-fade-in pb-12">
@@ -73,17 +78,65 @@ function AdminDashboardIndex() {
         </div>
       </div>
 
-      {/* METRIC CARDS GRID (11 Key SaaS Metrics) */}
+      {/* METRIC CARDS GRID (11 Key SaaS Metrics - All Dynamic) */}
       <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-        <MetricCard icon={DollarSign} label="Total Revenue" value={`$${reports?.revenueTotal?.toLocaleString() ?? "12,450"}`} change="+14% this month" color="bg-emerald-100 text-emerald-800" />
-        <MetricCard icon={ShoppingBag} label="Orders Processed" value={reports?.totalOrders ?? stats?.ordersCount ?? 84} change="+8% vs last month" color="bg-blue-100 text-blue-800" />
-        <MetricCard icon={BookOpen} label="Family Books" value={reports?.totalBooks ?? stats?.booksCount ?? 112} change="Active manuscripts" color="bg-amber-100 text-amber-800" />
-        <MetricCard icon={Users} label="Registered Users" value={reports?.totalUsers ?? stats?.usersCount ?? 48} change="+5 new today" color="bg-purple-100 text-purple-800" />
+        <MetricCard
+          icon={DollarSign}
+          label="Total Revenue"
+          value={`${currencySymbol}${totalRevenue.toLocaleString()}`}
+          change="Real-time gross revenue"
+          color="bg-emerald-100 text-emerald-800"
+        />
+        <MetricCard
+          icon={ShoppingBag}
+          label="Orders Processed"
+          value={reports?.totalOrders ?? stats?.counts?.orders ?? 0}
+          change="Total platform transactions"
+          color="bg-blue-100 text-blue-800"
+        />
+        <MetricCard
+          icon={BookOpen}
+          label="Family Books"
+          value={reports?.totalBooks ?? stats?.counts?.books ?? 0}
+          change="Active manuscripts"
+          color="bg-amber-100 text-amber-800"
+        />
+        <MetricCard
+          icon={Users}
+          label="Registered Users"
+          value={reports?.totalUsers ?? stats?.counts?.users ?? 0}
+          change="Total user accounts"
+          color="bg-purple-100 text-purple-800"
+        />
 
-        <MetricCard icon={HardDriveDownload} label="Downloads" value="234" change="PDF & Word exports" color="bg-slate-100 text-slate-800" />
-        <MetricCard icon={HelpCircle} label="Support Tickets" value={reports?.totalTickets ?? 14} change="2 open pending" color="bg-orange-100 text-orange-800" />
-        <MetricCard icon={Bug} label="Bug Reports" value="3" change="1 investigating" color="bg-red-100 text-red-800" />
-        <MetricCard icon={Sparkles} label="Feature Requests" value="18" change="4 under review" color="bg-indigo-100 text-indigo-800" />
+        <MetricCard
+          icon={HardDriveDownload}
+          label="Downloads"
+          value={reports?.downloadsCount ?? 0}
+          change="Exported manuscripts"
+          color="bg-slate-100 text-slate-800"
+        />
+        <MetricCard
+          icon={HelpCircle}
+          label="Support Tickets"
+          value={reports?.totalTickets ?? 0}
+          change="Active customer tickets"
+          color="bg-orange-100 text-orange-800"
+        />
+        <MetricCard
+          icon={Bug}
+          label="Bug Reports"
+          value={reports?.bugReportsCount ?? 0}
+          change="Reported system bugs"
+          color="bg-red-100 text-red-800"
+        />
+        <MetricCard
+          icon={Sparkles}
+          label="Feature Requests"
+          value={reports?.featureRequestsCount ?? 0}
+          change="Community suggestions"
+          color="bg-indigo-100 text-indigo-800"
+        />
       </div>
 
       {/* SECONDARY SYSTEM STATUS BAR */}
@@ -96,12 +149,16 @@ function AdminDashboardIndex() {
               </div>
               <div>
                 <div className="text-sm font-semibold">AI Usage & Cost</div>
-                <div className="text-xs text-muted-foreground">Gemini + OpenAI</div>
+                <div className="text-xs text-muted-foreground">Gemini + OpenAI Engine</div>
               </div>
             </div>
             <div className="text-right">
-              <div className="font-mono font-bold text-sm text-[color:var(--ink)]">1,420 calls</div>
-              <div className="text-[11px] text-muted-foreground">$38.50 spent</div>
+              <div className="font-mono font-bold text-sm text-[color:var(--ink)]">
+                {reports?.aiRequests ?? 0} calls
+              </div>
+              <div className="text-[11px] text-muted-foreground">
+                ${(reports?.aiTotalCost ?? 0).toFixed(2)} spent
+              </div>
             </div>
           </div>
         </Card>
@@ -118,7 +175,7 @@ function AdminDashboardIndex() {
               </div>
             </div>
             <Badge variant="outline" className="border-emerald-300 text-emerald-700 bg-emerald-50 text-[10px]">
-              Connected
+              Active
             </Badge>
           </div>
         </Card>
@@ -130,11 +187,13 @@ function AdminDashboardIndex() {
                 <Shield className="h-5 w-5" />
               </div>
               <div>
-                <div className="text-sm font-semibold">System Backup</div>
-                <div className="text-xs text-muted-foreground">Automated Daily</div>
+                <div className="text-sm font-semibold">System Security</div>
+                <div className="text-xs text-muted-foreground">Encryption & RLS</div>
               </div>
             </div>
-            <span className="text-xs text-muted-foreground font-mono">2h ago</span>
+            <Badge variant="outline" className="border-purple-300 text-purple-700 bg-purple-50 text-[10px]">
+              Protected
+            </Badge>
           </div>
         </Card>
       </div>
@@ -144,21 +203,34 @@ function AdminDashboardIndex() {
         {/* Stream 1: Recent Activity Stream */}
         <Card className="p-6 rounded-2xl bg-white border-border/60 shadow-2xs space-y-4">
           <div className="flex items-center justify-between">
-            <h3 className="font-serif text-base font-semibold text-[color:var(--ink)]">Latest Platform Activity</h3>
+            <h3 className="font-serif text-base font-semibold text-[color:var(--ink)]">Latest Admin Activity</h3>
             <Button asChild size="sm" variant="ghost" className="h-7 text-xs">
               <Link to="/admin/activity-logs">View Audit Logs →</Link>
             </Button>
           </div>
 
           <div className="space-y-3">
-            <ActivityRow title="User Registered" subtitle="subrata.dasgupta749@gmail.com" time="12m ago text-emerald-600" />
-            <ActivityRow title="Order Placed ($49.00)" subtitle="Hardcover heirloom book order #ORD-84" time="1h ago" />
-            <ActivityRow title="PDF Manuscript Generated" subtitle="My Grandfather's Legacy" time="3h ago" />
-            <ActivityRow title="Support Ticket Replied" subtitle="TICK-1001 resolved by Admin" time="5h ago" />
+            {!streams?.activities || streams.activities.length === 0 ? (
+              <div className="py-8 text-center text-xs text-muted-foreground border border-dashed rounded-xl">
+                No recent admin activity logged yet.
+              </div>
+            ) : (
+              streams.activities.map((act: any) => (
+                <div key={act.id} className="flex items-center justify-between py-2 border-b border-border/40 last:border-0 text-xs">
+                  <div>
+                    <div className="font-semibold text-foreground">{act.action}</div>
+                    <div className="text-muted-foreground">{act.resource_type}</div>
+                  </div>
+                  <div className="text-[11px] text-muted-foreground font-mono">
+                    {formatDistanceToNow(new Date(act.created_at), { addSuffix: true })}
+                  </div>
+                </div>
+              ))
+            )}
           </div>
         </Card>
 
-        {/* Stream 2: Recent Payments */}
+        {/* Stream 2: Recent Transactions */}
         <Card className="p-6 rounded-2xl bg-white border-border/60 shadow-2xs space-y-4">
           <div className="flex items-center justify-between">
             <h3 className="font-serif text-base font-semibold text-[color:var(--ink)]">Recent Transactions</h3>
@@ -168,10 +240,25 @@ function AdminDashboardIndex() {
           </div>
 
           <div className="space-y-3">
-            <PaymentRow user="Eleanor Vance" plan="Hardcover Heirloom" amount="$49.00" status="Completed" />
-            <PaymentRow user="James Sterling" plan="Digital Standard" amount="$29.00" status="Completed" />
-            <PaymentRow user="Robert Chen" plan="Hardcover Heirloom" amount="$49.00" status="Completed" />
-            <PaymentRow user="Margaret Miller" plan="Digital Standard" amount="$29.00" status="Completed" />
+            {!streams?.transactions || streams.transactions.length === 0 ? (
+              <div className="py-8 text-center text-xs text-muted-foreground border border-dashed rounded-xl">
+                No payment transactions recorded yet.
+              </div>
+            ) : (
+              streams.transactions.map((tx: any) => (
+                <div key={tx.id} className="flex items-center justify-between py-2 border-b border-border/40 last:border-0 text-xs">
+                  <div>
+                    <div className="font-semibold text-foreground">{tx.user?.full_name ?? tx.user?.email ?? "Customer"}</div>
+                    <div className="text-muted-foreground">{tx.currency} {tx.amount}</div>
+                  </div>
+                  <div className="text-right">
+                    <Badge variant="outline" className="text-[9px] bg-emerald-50 text-emerald-700 border-emerald-200">
+                      {tx.status}
+                    </Badge>
+                  </div>
+                </div>
+              ))
+            )}
           </div>
         </Card>
       </div>
@@ -191,34 +278,5 @@ function MetricCard({ icon: Icon, label, value, change, color }: any) {
       <div className="mt-2 text-2xl font-bold font-serif text-[color:var(--ink)]">{value}</div>
       <div className="mt-1 text-[11px] text-muted-foreground">{change}</div>
     </Card>
-  );
-}
-
-function ActivityRow({ title, subtitle, time }: any) {
-  return (
-    <div className="flex items-center justify-between py-2 border-b border-border/40 last:border-0 text-xs">
-      <div>
-        <div className="font-semibold text-foreground">{title}</div>
-        <div className="text-muted-foreground">{subtitle}</div>
-      </div>
-      <div className="text-[11px] text-muted-foreground font-mono">{time}</div>
-    </div>
-  );
-}
-
-function PaymentRow({ user, plan, amount, status }: any) {
-  return (
-    <div className="flex items-center justify-between py-2 border-b border-border/40 last:border-0 text-xs">
-      <div>
-        <div className="font-semibold text-foreground">{user}</div>
-        <div className="text-muted-foreground">{plan}</div>
-      </div>
-      <div className="text-right">
-        <div className="font-mono font-bold text-foreground">{amount}</div>
-        <Badge variant="outline" className="text-[9px] bg-emerald-50 text-emerald-700 border-emerald-200">
-          {status}
-        </Badge>
-      </div>
-    </div>
   );
 }

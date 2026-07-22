@@ -154,21 +154,81 @@ export const generateAdminReportData = createServerFn({ method: "GET" })
     await assertAdmin(context);
     const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
 
-    // Aggregate counts
-    const { count: usersCount } = await supabaseAdmin.from("profiles").select("*", { count: "exact", head: true });
-    const { count: booksCount } = await supabaseAdmin.from("books").select("*", { count: "exact", head: true });
-    const { count: ordersCount } = await supabaseAdmin.from("orders").select("*", { count: "exact", head: true });
-    const { count: ticketsCount } = await supabaseAdmin.from("support_tickets").select("*", { count: "exact", head: true });
+    const [users, books, orders, tickets, bugs, features, txPaid, exportsCount, aiLogsCount] = await Promise.all([
+      supabaseAdmin.from("profiles").select("id", { count: "exact", head: true }),
+      supabaseAdmin.from("books").select("id", { count: "exact", head: true }),
+      supabaseAdmin.from("orders").select("id", { count: "exact", head: true }),
+      supabaseAdmin.from("support_tickets").select("id", { count: "exact", head: true }),
+      supabaseAdmin.from("bug_reports").select("id", { count: "exact", head: true }),
+      supabaseAdmin.from("feature_requests").select("id", { count: "exact", head: true }),
+      supabaseAdmin.from("payment_transactions").select("amount, created_at").eq("status", "succeeded"),
+      supabaseAdmin.from("book_exports").select("id", { count: "exact", head: true }).catch(() => ({ count: 0 })),
+      supabaseAdmin.from("ai_audit_logs").select("id", { count: "exact", head: true }).catch(() => ({ count: 0 })),
+    ]);
+
+    const revenueTotal = (txPaid.data ?? []).reduce((sum: number, r: any) => sum + Number(r.amount || 0), 0);
+
+    const startOfMonth = new Date();
+    startOfMonth.setDate(1);
+    startOfMonth.setHours(0, 0, 0, 0);
+    const monthlyRevenue = (txPaid.data ?? [])
+      .filter((r: any) => new Date(r.created_at) >= startOfMonth)
+      .reduce((sum: number, r: any) => sum + Number(r.amount || 0), 0);
 
     return {
-      revenueTotal: 12450.00,
-      monthlyRevenue: 3200.00,
-      totalUsers: usersCount ?? 48,
-      totalBooks: booksCount ?? 112,
-      totalOrders: ordersCount ?? 84,
-      totalTickets: ticketsCount ?? 14,
-      aiRequests: 1420,
-      aiTotalCost: 38.50,
+      revenueTotal,
+      monthlyRevenue,
+      totalUsers: users.count ?? 0,
+      totalBooks: books.count ?? 0,
+      totalOrders: orders.count ?? 0,
+      totalTickets: tickets.count ?? 0,
+      bugReportsCount: bugs.count ?? 0,
+      featureRequestsCount: features.count ?? 0,
+      downloadsCount: (exportsCount as any)?.count ?? 0,
+      aiRequests: (aiLogsCount as any)?.count ?? 0,
+      aiTotalCost: 0.00,
       generatedAt: new Date().toISOString(),
     };
   });
+
+export const getAdminDashboardStreams = createServerFn({ method: "GET" })
+  .middleware([requireSupabaseAuth])
+  .handler(async ({ context }) => {
+    await assertAdmin(context);
+    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+
+    // Fetch real recent transactions
+    const { data: transactions } = await supabaseAdmin
+      .from("payment_transactions")
+      .select("id, amount, currency, status, created_at, user_id")
+      .order("created_at", { ascending: false })
+      .limit(5);
+
+    let enrichedTransactions: any[] = [];
+    if (transactions && transactions.length > 0) {
+      const userIds = Array.from(new Set(transactions.map((t: any) => t.user_id)));
+      const { data: profs } = await supabaseAdmin
+        .from("profiles")
+        .select("id, full_name, email")
+        .in("id", userIds);
+
+      const profileMap = new Map((profs ?? []).map((p: any) => [p.id, p]));
+      enrichedTransactions = transactions.map((t: any) => ({
+        ...t,
+        user: profileMap.get(t.user_id) ?? { full_name: "Customer", email: "" },
+      }));
+    }
+
+    // Fetch real recent activity logs
+    const { data: activityLogs } = await supabaseAdmin
+      .from("admin_activity_logs")
+      .select("*")
+      .order("created_at", { ascending: false })
+      .limit(5);
+
+    return {
+      transactions: enrichedTransactions,
+      activities: activityLogs ?? [],
+    };
+  });
+
