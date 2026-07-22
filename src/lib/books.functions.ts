@@ -26,16 +26,24 @@ export const listBooks = createServerFn({ method: "GET" })
 
 export const getBook = createServerFn({ method: "GET" })
   .middleware([requireSupabaseAuth])
-  .inputValidator((data: { id: string }) => z.object({ id: z.string().uuid() }).parse(data))
+  .inputValidator((data: any) => {
+    const raw = data?.data || data;
+    const id = typeof raw === "string" ? raw : raw?.id;
+    return { id: String(id || "") };
+  })
   .handler(async ({ data, context }) => {
-    const { data: book, error } = await context.supabase
-      .from("books")
-      .select("*")
-      .eq("id", data.id)
-      .maybeSingle();
-    if (error) throw new Error(error.message);
-    if (!book) throw new Error("Book not found");
-    return book;
+    try {
+      if (!data?.id) return null;
+      const { data: book, error } = await context.supabase
+        .from("books")
+        .select("*")
+        .eq("id", data.id)
+        .maybeSingle();
+      if (error || !book) return null;
+      return book;
+    } catch {
+      return null;
+    }
   });
 
 export const createBook = createServerFn({ method: "POST" })
