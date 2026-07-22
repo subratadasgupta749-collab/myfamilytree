@@ -29,10 +29,10 @@ function AdminReportsPage() {
   const exportCSV = (type: string) => {
     let content = `Report Type,${type.toUpperCase()}\n`;
     content += `Generated At,${new Date().toISOString()}\n`;
-    content += `Total Revenue,$${reports?.revenueTotal ?? 12450}\n`;
-    content += `Total Books,${reports?.totalBooks ?? 112}\n`;
-    content += `Total Orders,${reports?.totalOrders ?? 84}\n`;
-    content += `Total Users,${reports?.totalUsers ?? 48}\n`;
+    content += `Total Revenue,$${reports?.revenueTotal ?? 0}\n`;
+    content += `Total Books,${reports?.totalBooks ?? 0}\n`;
+    content += `Total Orders,${reports?.totalOrders ?? 0}\n`;
+    content += `Total Users,${reports?.totalUsers ?? 0}\n`;
 
     const blob = new Blob([content], { type: "text/csv" });
     const url = URL.createObjectURL(blob);
@@ -84,35 +84,35 @@ function AdminReportsPage() {
           icon={DollarSign}
           title="Revenue & Billing Report"
           subtitle="Detailed ledger of gross volume, gateway breakdowns, refunds, and platform net margin."
-          metric={`$${reports?.revenueTotal?.toLocaleString() ?? "12,450"}`}
+          metric={`$${(reports?.revenueTotal ?? 0).toLocaleString()}`}
           onExport={() => exportCSV("revenue")}
         />
         <ReportCard
           icon={BookOpen}
           title="Book Manuscript Report"
           subtitle="Compilation statistics, chapter completion rates, and average manuscript length."
-          metric={`${reports?.totalBooks ?? 112} Books`}
+          metric={`${reports?.totalBooks ?? 0} Books`}
           onExport={() => exportCSV("books")}
         />
         <ReportCard
           icon={Users}
           title="User Growth Report"
           subtitle="User signups, retention rates, referral shares, and active manuscript writers."
-          metric={`${reports?.totalUsers ?? 48} Users`}
+          metric={`${reports?.totalUsers ?? 0} Users`}
           onExport={() => exportCSV("users")}
         />
         <ReportCard
           icon={HelpCircle}
           title="Support Center Report"
           subtitle="Ticket resolution times, user satisfaction, bug report rates, and feature request upvotes."
-          metric={`${reports?.totalTickets ?? 14} Tickets`}
+          metric={`${reports?.totalTickets ?? 0} Tickets`}
           onExport={() => exportCSV("support")}
         />
         <ReportCard
           icon={Cpu}
           title="AI Engine Cost Report"
           subtitle="Token consumption by provider (Gemini vs OpenAI), model efficiency, and cost per book."
-          metric={`$${reports?.aiTotalCost ?? 38.50}`}
+          metric={`$${(reports?.aiTotalCost ?? 0).toFixed(2)}`}
           onExport={() => exportCSV("ai-usage")}
         />
       </div>
