@@ -43,6 +43,7 @@ import { Route as AuthenticatedAppCheckoutSuccessRouteImport } from './routes/_a
 import { Route as AuthenticatedAppCheckoutCancelRouteImport } from './routes/_authenticated/_app/checkout.cancel'
 import { Route as AuthenticatedAppBooksNewRouteImport } from './routes/_authenticated/_app/books.new'
 import { Route as AuthenticatedAdminAdminUsersRouteImport } from './routes/_authenticated/_admin/admin.users'
+import { Route as AuthenticatedAdminAdminSupportRouteImport } from './routes/_authenticated/_admin/admin.support'
 import { Route as AuthenticatedAdminAdminSettingsRouteImport } from './routes/_authenticated/_admin/admin.settings'
 import { Route as AuthenticatedAdminAdminReferralsRouteImport } from './routes/_authenticated/_admin/admin.referrals'
 import { Route as AuthenticatedAdminAdminPlansRouteImport } from './routes/_authenticated/_admin/admin.plans'
@@ -254,6 +255,12 @@ const AuthenticatedAdminAdminUsersRoute =
   AuthenticatedAdminAdminUsersRouteImport.update({
     id: '/admin/users',
     path: '/admin/users',
+    getParentRoute: () => AuthenticatedAdminRoute,
+  } as any)
+const AuthenticatedAdminAdminSupportRoute =
+  AuthenticatedAdminAdminSupportRouteImport.update({
+    id: '/admin/support',
+    path: '/admin/support',
     getParentRoute: () => AuthenticatedAdminRoute,
   } as any)
 const AuthenticatedAdminAdminSettingsRoute =
@@ -490,6 +497,7 @@ export interface FileRoutesByFullPath {
   '/admin/plans': typeof AuthenticatedAdminAdminPlansRoute
   '/admin/referrals': typeof AuthenticatedAdminAdminReferralsRoute
   '/admin/settings': typeof AuthenticatedAdminAdminSettingsRoute
+  '/admin/support': typeof AuthenticatedAdminAdminSupportRoute
   '/admin/users': typeof AuthenticatedAdminAdminUsersRoute
   '/books/new': typeof AuthenticatedAppBooksNewRoute
   '/checkout/cancel': typeof AuthenticatedAppCheckoutCancelRoute
@@ -554,6 +562,7 @@ export interface FileRoutesByTo {
   '/admin/plans': typeof AuthenticatedAdminAdminPlansRoute
   '/admin/referrals': typeof AuthenticatedAdminAdminReferralsRoute
   '/admin/settings': typeof AuthenticatedAdminAdminSettingsRoute
+  '/admin/support': typeof AuthenticatedAdminAdminSupportRoute
   '/admin/users': typeof AuthenticatedAdminAdminUsersRoute
   '/books/new': typeof AuthenticatedAppBooksNewRoute
   '/checkout/cancel': typeof AuthenticatedAppCheckoutCancelRoute
@@ -622,6 +631,7 @@ export interface FileRoutesById {
   '/_authenticated/_admin/admin/plans': typeof AuthenticatedAdminAdminPlansRoute
   '/_authenticated/_admin/admin/referrals': typeof AuthenticatedAdminAdminReferralsRoute
   '/_authenticated/_admin/admin/settings': typeof AuthenticatedAdminAdminSettingsRoute
+  '/_authenticated/_admin/admin/support': typeof AuthenticatedAdminAdminSupportRoute
   '/_authenticated/_admin/admin/users': typeof AuthenticatedAdminAdminUsersRoute
   '/_authenticated/_app/books/new': typeof AuthenticatedAppBooksNewRoute
   '/_authenticated/_app/checkout/cancel': typeof AuthenticatedAppCheckoutCancelRoute
@@ -688,6 +698,7 @@ export interface FileRouteTypes {
     | '/admin/plans'
     | '/admin/referrals'
     | '/admin/settings'
+    | '/admin/support'
     | '/admin/users'
     | '/books/new'
     | '/checkout/cancel'
@@ -752,6 +763,7 @@ export interface FileRouteTypes {
     | '/admin/plans'
     | '/admin/referrals'
     | '/admin/settings'
+    | '/admin/support'
     | '/admin/users'
     | '/books/new'
     | '/checkout/cancel'
@@ -819,6 +831,7 @@ export interface FileRouteTypes {
     | '/_authenticated/_admin/admin/plans'
     | '/_authenticated/_admin/admin/referrals'
     | '/_authenticated/_admin/admin/settings'
+    | '/_authenticated/_admin/admin/support'
     | '/_authenticated/_admin/admin/users'
     | '/_authenticated/_app/books/new'
     | '/_authenticated/_app/checkout/cancel'
@@ -1097,6 +1110,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedAdminAdminUsersRouteImport
       parentRoute: typeof AuthenticatedAdminRoute
     }
+    '/_authenticated/_admin/admin/support': {
+      id: '/_authenticated/_admin/admin/support'
+      path: '/admin/support'
+      fullPath: '/admin/support'
+      preLoaderRoute: typeof AuthenticatedAdminAdminSupportRouteImport
+      parentRoute: typeof AuthenticatedAdminRoute
+    }
     '/_authenticated/_admin/admin/settings': {
       id: '/_authenticated/_admin/admin/settings'
       path: '/admin/settings'
@@ -1341,6 +1361,7 @@ interface AuthenticatedAdminRouteChildren {
   AuthenticatedAdminAdminPlansRoute: typeof AuthenticatedAdminAdminPlansRoute
   AuthenticatedAdminAdminReferralsRoute: typeof AuthenticatedAdminAdminReferralsRoute
   AuthenticatedAdminAdminSettingsRoute: typeof AuthenticatedAdminAdminSettingsRoute
+  AuthenticatedAdminAdminSupportRoute: typeof AuthenticatedAdminAdminSupportRoute
   AuthenticatedAdminAdminUsersRoute: typeof AuthenticatedAdminAdminUsersRoute
   AuthenticatedAdminAdminIndexRoute: typeof AuthenticatedAdminAdminIndexRoute
   AuthenticatedAdminAdminBlogPostIdRoute: typeof AuthenticatedAdminAdminBlogPostIdRoute
@@ -1377,6 +1398,7 @@ const AuthenticatedAdminRouteChildren: AuthenticatedAdminRouteChildren = {
   AuthenticatedAdminAdminPlansRoute: AuthenticatedAdminAdminPlansRoute,
   AuthenticatedAdminAdminReferralsRoute: AuthenticatedAdminAdminReferralsRoute,
   AuthenticatedAdminAdminSettingsRoute: AuthenticatedAdminAdminSettingsRoute,
+  AuthenticatedAdminAdminSupportRoute: AuthenticatedAdminAdminSupportRoute,
   AuthenticatedAdminAdminUsersRoute: AuthenticatedAdminAdminUsersRoute,
   AuthenticatedAdminAdminIndexRoute: AuthenticatedAdminAdminIndexRoute,
   AuthenticatedAdminAdminBlogPostIdRoute:
