@@ -18,6 +18,7 @@ import { CreditCard, Loader2, Lock, ShieldCheck, Tag, X } from "lucide-react";
 const searchSchema = z.object({
   bookId: z.string().optional(),
   amount: z.coerce.number().positive().optional(),
+  plan: z.string().optional(),
 });
 
 export const Route = createFileRoute("/_authenticated/_app/checkout")({
@@ -27,13 +28,17 @@ export const Route = createFileRoute("/_authenticated/_app/checkout")({
 });
 
 function CheckoutPage() {
-  const { bookId, amount: overrideAmount } = Route.useSearch();
+  const { bookId, amount: overrideAmount, plan: selectedPlanId } = Route.useSearch();
   const settings = useSettings();
   const { user } = useAuth();
   const navigate = useNavigate();
 
-  const price = overrideAmount ?? Number((settings as any)?.pricing?.book_price ?? 34);
-  const currency = String((settings as any)?.pricing?.currency ?? "USD");
+  const plansList = (settings as any)?.pricing?.plans ?? [];
+  const selectedPlan = selectedPlanId ? plansList.find((p: any) => p.id === selectedPlanId) : null;
+
+  const price = overrideAmount ?? selectedPlan?.price ?? Number((settings as any)?.pricing?.book_price ?? 34);
+  const currency = selectedPlan?.currency ?? String((settings as any)?.pricing?.currency ?? "USD");
+  const planName = selectedPlan?.name ?? "My Family History Book — Premium Memoir";
 
   const fetchGateways = useServerFn(listCheckoutGateways);
   const startCheckout = useServerFn(initiateCheckout);
@@ -85,7 +90,7 @@ function CheckoutPage() {
           gatewayId: chosen.id,
           amount: price,
           currency,
-          description: "My Family History Book — Premium Memoir",
+          description: planName,
           customerEmail: user?.email ?? undefined,
           origin: window.location.origin,
           metadata: bookId ? { book_id: bookId } : undefined,
@@ -179,7 +184,7 @@ function CheckoutPage() {
           <div className="text-sm font-semibold uppercase tracking-wide text-muted-foreground">Order summary</div>
           <div className="space-y-2 text-sm">
             <div className="flex justify-between">
-              <span>The Family History Book</span>
+              <span>{planName}</span>
               <span>{currency} {price.toFixed(2)}</span>
             </div>
             {applied && (

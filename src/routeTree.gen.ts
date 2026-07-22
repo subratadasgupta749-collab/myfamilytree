@@ -41,6 +41,7 @@ import { Route as AuthenticatedAppBooksNewRouteImport } from './routes/_authenti
 import { Route as AuthenticatedAdminAdminUsersRouteImport } from './routes/_authenticated/_admin/admin.users'
 import { Route as AuthenticatedAdminAdminSettingsRouteImport } from './routes/_authenticated/_admin/admin.settings'
 import { Route as AuthenticatedAdminAdminReferralsRouteImport } from './routes/_authenticated/_admin/admin.referrals'
+import { Route as AuthenticatedAdminAdminPlansRouteImport } from './routes/_authenticated/_admin/admin.plans'
 import { Route as AuthenticatedAdminAdminPaymentGatewaysRouteImport } from './routes/_authenticated/_admin/admin.payment-gateways'
 import { Route as AuthenticatedAdminAdminOrdersRouteImport } from './routes/_authenticated/_admin/admin.orders'
 import { Route as AuthenticatedAdminAdminMessagesRouteImport } from './routes/_authenticated/_admin/admin.messages'
@@ -238,6 +239,12 @@ const AuthenticatedAdminAdminReferralsRoute =
   AuthenticatedAdminAdminReferralsRouteImport.update({
     id: '/admin/referrals',
     path: '/admin/referrals',
+    getParentRoute: () => AuthenticatedAdminRoute,
+  } as any)
+const AuthenticatedAdminAdminPlansRoute =
+  AuthenticatedAdminAdminPlansRouteImport.update({
+    id: '/admin/plans',
+    path: '/admin/plans',
     getParentRoute: () => AuthenticatedAdminRoute,
   } as any)
 const AuthenticatedAdminAdminPaymentGatewaysRoute =
@@ -449,6 +456,7 @@ export interface FileRoutesByFullPath {
   '/admin/messages': typeof AuthenticatedAdminAdminMessagesRoute
   '/admin/orders': typeof AuthenticatedAdminAdminOrdersRoute
   '/admin/payment-gateways': typeof AuthenticatedAdminAdminPaymentGatewaysRoute
+  '/admin/plans': typeof AuthenticatedAdminAdminPlansRoute
   '/admin/referrals': typeof AuthenticatedAdminAdminReferralsRoute
   '/admin/settings': typeof AuthenticatedAdminAdminSettingsRoute
   '/admin/users': typeof AuthenticatedAdminAdminUsersRoute
@@ -508,6 +516,7 @@ export interface FileRoutesByTo {
   '/admin/messages': typeof AuthenticatedAdminAdminMessagesRoute
   '/admin/orders': typeof AuthenticatedAdminAdminOrdersRoute
   '/admin/payment-gateways': typeof AuthenticatedAdminAdminPaymentGatewaysRoute
+  '/admin/plans': typeof AuthenticatedAdminAdminPlansRoute
   '/admin/referrals': typeof AuthenticatedAdminAdminReferralsRoute
   '/admin/settings': typeof AuthenticatedAdminAdminSettingsRoute
   '/admin/users': typeof AuthenticatedAdminAdminUsersRoute
@@ -571,6 +580,7 @@ export interface FileRoutesById {
   '/_authenticated/_admin/admin/messages': typeof AuthenticatedAdminAdminMessagesRoute
   '/_authenticated/_admin/admin/orders': typeof AuthenticatedAdminAdminOrdersRoute
   '/_authenticated/_admin/admin/payment-gateways': typeof AuthenticatedAdminAdminPaymentGatewaysRoute
+  '/_authenticated/_admin/admin/plans': typeof AuthenticatedAdminAdminPlansRoute
   '/_authenticated/_admin/admin/referrals': typeof AuthenticatedAdminAdminReferralsRoute
   '/_authenticated/_admin/admin/settings': typeof AuthenticatedAdminAdminSettingsRoute
   '/_authenticated/_admin/admin/users': typeof AuthenticatedAdminAdminUsersRoute
@@ -632,6 +642,7 @@ export interface FileRouteTypes {
     | '/admin/messages'
     | '/admin/orders'
     | '/admin/payment-gateways'
+    | '/admin/plans'
     | '/admin/referrals'
     | '/admin/settings'
     | '/admin/users'
@@ -691,6 +702,7 @@ export interface FileRouteTypes {
     | '/admin/messages'
     | '/admin/orders'
     | '/admin/payment-gateways'
+    | '/admin/plans'
     | '/admin/referrals'
     | '/admin/settings'
     | '/admin/users'
@@ -753,6 +765,7 @@ export interface FileRouteTypes {
     | '/_authenticated/_admin/admin/messages'
     | '/_authenticated/_admin/admin/orders'
     | '/_authenticated/_admin/admin/payment-gateways'
+    | '/_authenticated/_admin/admin/plans'
     | '/_authenticated/_admin/admin/referrals'
     | '/_authenticated/_admin/admin/settings'
     | '/_authenticated/_admin/admin/users'
@@ -1019,6 +1032,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedAdminAdminReferralsRouteImport
       parentRoute: typeof AuthenticatedAdminRoute
     }
+    '/_authenticated/_admin/admin/plans': {
+      id: '/_authenticated/_admin/admin/plans'
+      path: '/admin/plans'
+      fullPath: '/admin/plans'
+      preLoaderRoute: typeof AuthenticatedAdminAdminPlansRouteImport
+      parentRoute: typeof AuthenticatedAdminRoute
+    }
     '/_authenticated/_admin/admin/payment-gateways': {
       id: '/_authenticated/_admin/admin/payment-gateways'
       path: '/admin/payment-gateways'
@@ -1239,6 +1259,7 @@ interface AuthenticatedAdminRouteChildren {
   AuthenticatedAdminAdminMessagesRoute: typeof AuthenticatedAdminAdminMessagesRoute
   AuthenticatedAdminAdminOrdersRoute: typeof AuthenticatedAdminAdminOrdersRoute
   AuthenticatedAdminAdminPaymentGatewaysRoute: typeof AuthenticatedAdminAdminPaymentGatewaysRoute
+  AuthenticatedAdminAdminPlansRoute: typeof AuthenticatedAdminAdminPlansRoute
   AuthenticatedAdminAdminReferralsRoute: typeof AuthenticatedAdminAdminReferralsRoute
   AuthenticatedAdminAdminSettingsRoute: typeof AuthenticatedAdminAdminSettingsRoute
   AuthenticatedAdminAdminUsersRoute: typeof AuthenticatedAdminAdminUsersRoute
@@ -1274,6 +1295,7 @@ const AuthenticatedAdminRouteChildren: AuthenticatedAdminRouteChildren = {
   AuthenticatedAdminAdminOrdersRoute: AuthenticatedAdminAdminOrdersRoute,
   AuthenticatedAdminAdminPaymentGatewaysRoute:
     AuthenticatedAdminAdminPaymentGatewaysRoute,
+  AuthenticatedAdminAdminPlansRoute: AuthenticatedAdminAdminPlansRoute,
   AuthenticatedAdminAdminReferralsRoute: AuthenticatedAdminAdminReferralsRoute,
   AuthenticatedAdminAdminSettingsRoute: AuthenticatedAdminAdminSettingsRoute,
   AuthenticatedAdminAdminUsersRoute: AuthenticatedAdminAdminUsersRoute,

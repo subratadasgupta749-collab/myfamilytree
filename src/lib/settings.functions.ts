@@ -13,6 +13,7 @@ export const PUBLIC_CATEGORIES = [
   "announcement",
   "legal",
   "media",
+  "pricing",
 ] as const;
 
 /** All known categories (admin panel tabs). */
@@ -28,6 +29,7 @@ export const ALL_CATEGORIES = [
   "security",
   "media",
   "legal",
+  "pricing",
 ] as const;
 
 /** Server-only: strip fields that must never leave the server. */

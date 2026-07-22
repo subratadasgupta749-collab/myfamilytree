@@ -628,7 +628,10 @@ function Testimonials() {
 }
 
 function Pricing() {
-  const includes = [
+  const settings = useSettings();
+  const rawPlans = (settings as any)?.pricing?.plans;
+  
+  const fallbackIncludes = [
     "Unlimited AI-guided interviews",
     "Up to 200 photos, beautifully placed",
     "Professionally written chapters",
@@ -636,54 +639,148 @@ function Pricing() {
     "Preview before you pay",
     "Free lifetime updates to your book",
   ];
+
+  const plans = rawPlans && rawPlans.length > 0 ? rawPlans : [
+    {
+      id: "digital-memoir",
+      name: "The Family History Book",
+      price: 34,
+      currency: "USD",
+      badge: "One-time payment",
+      description: "One-time. No subscription. Ever.",
+      features: fallbackIncludes,
+      popular: true
+    }
+  ];
+
   return (
     <section id="pricing" className="relative overflow-hidden bg-gradient-to-b from-[color:var(--beige)] to-[color:var(--cream)] py-24">
       <div className="mx-auto max-w-7xl px-5 sm:px-8">
         <div className="mx-auto max-w-2xl text-center">
           <SectionEyebrow>Simple pricing</SectionEyebrow>
           <h2 className="mt-5 font-serif text-4xl tracking-tight text-[color:var(--ink)] sm:text-5xl">
-            One book. One price. Forever yours.
+            {plans.length === 1 ? "One book. One price. Forever yours." : "Choose the perfect way to preserve your legacy."}
           </h2>
           <p className="mt-4 text-[color:var(--muted-foreground)]">
             No subscriptions, no hidden fees. Preview the entire book before you pay a cent.
           </p>
         </div>
 
-        <div className="mx-auto mt-14 grid max-w-3xl overflow-hidden rounded-[2rem] border border-[color:var(--border)] bg-white shadow-[var(--shadow-luxury)] md:grid-cols-[1.2fr_1fr]">
-          <div className="border-b border-[color:var(--border)] bg-gradient-to-br from-[color:var(--cream)] to-[color:var(--beige)] p-10 md:border-b-0 md:border-r">
-            <span className="inline-flex items-center gap-2 rounded-full bg-[color:var(--gold)]/15 px-3 py-1 text-xs uppercase tracking-widest text-[color:var(--primary)]">
-              One-time payment
-            </span>
-            <h3 className="mt-5 font-serif text-3xl text-[color:var(--ink)]">The Family History Book</h3>
-            <div className="mt-6 flex items-baseline gap-2">
-              <span className="font-serif text-6xl font-semibold text-[color:var(--ink)]">$34</span>
-              <span className="text-[color:var(--muted-foreground)]">USD</span>
+        {plans.length === 1 ? (
+          <div className="mx-auto mt-14 grid max-w-3xl overflow-hidden rounded-[2rem] border border-[color:var(--border)] bg-white shadow-[var(--shadow-luxury)] md:grid-cols-[1.2fr_1fr]">
+            <div className="border-b border-[color:var(--border)] bg-gradient-to-br from-[color:var(--cream)] to-[color:var(--beige)] p-10 md:border-b-0 md:border-r">
+              {plans[0].badge && (
+                <span className="inline-flex items-center gap-2 rounded-full bg-[color:var(--gold)]/15 px-3 py-1 text-xs uppercase tracking-widest text-[color:var(--primary)] font-semibold">
+                  {plans[0].badge}
+                </span>
+              )}
+              <h3 className="mt-5 font-serif text-3xl text-[color:var(--ink)]">{plans[0].name}</h3>
+              <div className="mt-6 flex items-baseline gap-2">
+                <span className="font-serif text-6xl font-semibold text-[color:var(--ink)]">
+                  {plans[0].currency === "USD" ? "$" : ""}{plans[0].price}
+                </span>
+                <span className="text-[color:var(--muted-foreground)]">{plans[0].currency}</span>
+              </div>
+              {plans[0].description && (
+                <p className="mt-2 text-sm text-[color:var(--muted-foreground)]">{plans[0].description}</p>
+              )}
+              <Button asChild size="lg" className="mt-8 h-13 w-full rounded-full bg-[color:var(--primary)] text-base text-[color:var(--primary-foreground)] shadow-[var(--shadow-soft)] hover:bg-[color:var(--primary)]/90">
+                <Link to="/checkout" search={{ plan: plans[0].id }}>
+                  Buy now — {plans[0].currency === "USD" ? "$" : ""}{plans[0].price}
+                </Link>
+              </Button>
+              <p className="mt-3 text-center text-xs text-[color:var(--muted-foreground)]">
+                Secure checkout · 30-day happiness guarantee
+              </p>
             </div>
-            <p className="mt-2 text-sm text-[color:var(--muted-foreground)]">One-time. No subscription. Ever.</p>
-            <Button asChild size="lg" className="mt-8 h-13 w-full rounded-full bg-[color:var(--primary)] text-base text-[color:var(--primary-foreground)] shadow-[var(--shadow-soft)] hover:bg-[color:var(--primary)]/90">
-              <Link to="/checkout">
-                Buy now — $34
-              </Link>
-            </Button>
-            <p className="mt-3 text-center text-xs text-[color:var(--muted-foreground)]">
-              Secure checkout · 30-day happiness guarantee
-            </p>
-          </div>
 
-          <div className="p-10">
-            <p className="text-xs uppercase tracking-widest text-[color:var(--muted-foreground)]">What's included</p>
-            <ul className="mt-4 space-y-3">
-              {includes.map((f) => (
-                <li key={f} className="flex items-start gap-3 text-sm text-[color:var(--ink)]">
-                  <span className="mt-0.5 grid h-5 w-5 shrink-0 place-items-center rounded-full bg-[color:var(--primary)]/10 text-[color:var(--primary)]">
-                    <Check className="h-3 w-3" />
-                  </span>
-                  {f}
-                </li>
-              ))}
-            </ul>
+            <div className="p-10">
+              <p className="text-xs uppercase tracking-widest text-[color:var(--muted-foreground)]">What's included</p>
+              <ul className="mt-4 space-y-3">
+                {plans[0].features.map((f: string) => (
+                  <li key={f} className="flex items-start gap-3 text-sm text-[color:var(--ink)]">
+                    <span className="mt-0.5 grid h-5 w-5 shrink-0 place-items-center rounded-full bg-[color:var(--primary)]/10 text-[color:var(--primary)]">
+                      <Check className="h-3 w-3" />
+                    </span>
+                    {f}
+                  </li>
+                ))}
+              </ul>
+            </div>
           </div>
-        </div>
+        ) : (
+          <div className={`mx-auto mt-14 grid max-w-6xl gap-8 px-4 ${plans.length === 2 ? "md:grid-cols-2 max-w-4xl" : "md:grid-cols-3"}`}>
+            {plans.map((p: any) => {
+              const isPopular = p.popular;
+              return (
+                <div
+                  key={p.id}
+                  className={`relative flex flex-col justify-between rounded-[2.5rem] border p-8 bg-white transition-all duration-300 hover:shadow-xl ${
+                    isPopular
+                      ? "border-[color:var(--primary)] ring-2 ring-[color:var(--primary)]/20 shadow-[var(--shadow-luxury)] scale-105 z-10"
+                      : "border-[color:var(--border)] shadow-[var(--shadow-soft)]"
+                  }`}
+                >
+                  {isPopular && (
+                    <span className="absolute -top-4 left-1/2 -translate-x-1/2 rounded-full bg-[color:var(--primary)] px-4 py-1 text-xs uppercase tracking-widest text-[color:var(--primary-foreground)] font-semibold shadow-md">
+                      {p.badge || "Most Popular"}
+                    </span>
+                  )}
+                  
+                  <div>
+                    {!isPopular && p.badge && (
+                      <span className="inline-flex items-center rounded-full bg-[color:var(--gold)]/10 px-2.5 py-0.5 text-xs font-medium text-[color:var(--primary)]">
+                        {p.badge}
+                      </span>
+                    )}
+                    <h3 className="mt-4 font-serif text-2xl text-[color:var(--ink)] font-semibold">{p.name}</h3>
+                    <p className="mt-2 text-xs text-[color:var(--muted-foreground)] min-h-[32px]">{p.description}</p>
+                    
+                    <div className="mt-6 flex items-baseline gap-2">
+                      <span className="font-serif text-5xl font-semibold text-[color:var(--ink)]">
+                        {p.currency === "USD" ? "$" : ""}{p.price}
+                      </span>
+                      <span className="text-xs text-[color:var(--muted-foreground)] font-medium">{p.currency}</span>
+                    </div>
+
+                    <div className="mt-8 border-t border-[color:var(--border)] pt-6">
+                      <p className="text-xs uppercase tracking-widest text-[color:var(--muted-foreground)] font-semibold">What's included</p>
+                      <ul className="mt-4 space-y-3.5">
+                        {p.features.map((f: string) => (
+                          <li key={f} className="flex items-start gap-3 text-sm text-[color:var(--ink)]">
+                            <span className="mt-0.5 grid h-5 w-5 shrink-0 place-items-center rounded-full bg-[color:var(--primary)]/10 text-[color:var(--primary)]">
+                              <Check className="h-3 w-3" />
+                            </span>
+                            {f}
+                          </li>
+                        ))}
+                      </ul>
+                    </div>
+                  </div>
+
+                  <div className="mt-8 pt-4">
+                    <Button
+                      asChild
+                      size="lg"
+                      className={`h-12 w-full rounded-full text-sm font-semibold shadow-[var(--shadow-soft)] transition hover:scale-[1.02] ${
+                        isPopular
+                          ? "bg-[color:var(--primary)] text-[color:var(--primary-foreground)] hover:bg-[color:var(--primary)]/90"
+                          : "bg-white border border-[color:var(--border)] text-[color:var(--ink)] hover:bg-[color:var(--cream)]/50"
+                      }`}
+                    >
+                      <Link to="/checkout" search={{ plan: p.id }}>
+                        Buy now — {p.currency === "USD" ? "$" : ""}{p.price}
+                      </Link>
+                    </Button>
+                    <p className="mt-2 text-center text-[10px] text-[color:var(--muted-foreground)]">
+                      30-day happiness guarantee
+                    </p>
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+        )}
       </div>
     </section>
   );

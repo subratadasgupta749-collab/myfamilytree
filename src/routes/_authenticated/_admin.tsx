@@ -1,6 +1,6 @@
 import { createFileRoute, Outlet, redirect, Link, useRouterState } from "@tanstack/react-router";
 import { supabase } from "@/integrations/supabase/client";
-import { BookHeart, Shield, LogOut, CreditCard, FileText, Users, BookOpen, ShoppingBag, Mail, Settings, BarChart3, Sparkles, MessageSquare, Activity, Send, Inbox, Tag, Gift, Trash2, Layers, Route as RouteIcon, GitBranch, HeartPulse, DollarSign, Gauge, ScrollText } from "lucide-react";
+import { BookHeart, Shield, LogOut, CreditCard, FileText, Users, BookOpen, ShoppingBag, Mail, Settings, BarChart3, Sparkles, MessageSquare, Activity, Send, Inbox, Tag, Gift, Trash2, Layers, Route as RouteIcon, GitBranch, HeartPulse, DollarSign, Gauge, ScrollText, Gem } from "lucide-react";
 import { useAuth } from "@/hooks/use-auth";
 
 export const Route = createFileRoute("/_authenticated/_admin")({
@@ -24,6 +24,7 @@ const nav = [
   { to: "/admin/messages", label: "Messages", icon: Mail },
   { to: "/admin/blog", label: "Blog", icon: FileText },
   { to: "/admin/payment-gateways", label: "Payment Gateways", icon: CreditCard },
+  { to: "/admin/plans", label: "Pricing Plans", icon: Gem },
   { to: "/admin/ai-providers", label: "AI Providers", icon: Sparkles },
   { to: "/admin/ai-models", label: "AI Models", icon: Layers },
   { to: "/admin/ai-features", label: "AI Feature Mapping", icon: GitBranch },
