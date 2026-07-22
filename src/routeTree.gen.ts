@@ -26,9 +26,13 @@ import { Route as AuthenticatedAppRouteImport } from './routes/_authenticated/_a
 import { Route as AuthenticatedAdminRouteImport } from './routes/_authenticated/_admin'
 import { Route as ApiPublicSettingsRouteImport } from './routes/api/public/settings'
 import { Route as ApiPublicPaypalCallbackRouteImport } from './routes/api/public/paypal-callback'
+import { Route as AuthenticatedAppSettingsRouteImport } from './routes/_authenticated/_app/settings'
 import { Route as AuthenticatedAppReferralsRouteImport } from './routes/_authenticated/_app/referrals'
 import { Route as AuthenticatedAppProfileRouteImport } from './routes/_authenticated/_app/profile'
 import { Route as AuthenticatedAppOrdersRouteImport } from './routes/_authenticated/_app/orders'
+import { Route as AuthenticatedAppNotificationsRouteImport } from './routes/_authenticated/_app/notifications'
+import { Route as AuthenticatedAppHelpRouteImport } from './routes/_authenticated/_app/help'
+import { Route as AuthenticatedAppDownloadsRouteImport } from './routes/_authenticated/_app/downloads'
 import { Route as AuthenticatedAppDashboardRouteImport } from './routes/_authenticated/_app/dashboard'
 import { Route as AuthenticatedAppCheckoutRouteImport } from './routes/_authenticated/_app/checkout'
 import { Route as AuthenticatedAppBooksIndexRouteImport } from './routes/_authenticated/_app/books.index'
@@ -153,6 +157,12 @@ const ApiPublicPaypalCallbackRoute = ApiPublicPaypalCallbackRouteImport.update({
   path: '/api/public/paypal-callback',
   getParentRoute: () => rootRouteImport,
 } as any)
+const AuthenticatedAppSettingsRoute =
+  AuthenticatedAppSettingsRouteImport.update({
+    id: '/settings',
+    path: '/settings',
+    getParentRoute: () => AuthenticatedAppRoute,
+  } as any)
 const AuthenticatedAppReferralsRoute =
   AuthenticatedAppReferralsRouteImport.update({
     id: '/referrals',
@@ -169,6 +179,23 @@ const AuthenticatedAppOrdersRoute = AuthenticatedAppOrdersRouteImport.update({
   path: '/orders',
   getParentRoute: () => AuthenticatedAppRoute,
 } as any)
+const AuthenticatedAppNotificationsRoute =
+  AuthenticatedAppNotificationsRouteImport.update({
+    id: '/notifications',
+    path: '/notifications',
+    getParentRoute: () => AuthenticatedAppRoute,
+  } as any)
+const AuthenticatedAppHelpRoute = AuthenticatedAppHelpRouteImport.update({
+  id: '/help',
+  path: '/help',
+  getParentRoute: () => AuthenticatedAppRoute,
+} as any)
+const AuthenticatedAppDownloadsRoute =
+  AuthenticatedAppDownloadsRouteImport.update({
+    id: '/downloads',
+    path: '/downloads',
+    getParentRoute: () => AuthenticatedAppRoute,
+  } as any)
 const AuthenticatedAppDashboardRoute =
   AuthenticatedAppDashboardRouteImport.update({
     id: '/dashboard',
@@ -431,9 +458,13 @@ export interface FileRoutesByFullPath {
   '/blog/': typeof BlogIndexRoute
   '/checkout': typeof AuthenticatedAppCheckoutRouteWithChildren
   '/dashboard': typeof AuthenticatedAppDashboardRoute
+  '/downloads': typeof AuthenticatedAppDownloadsRoute
+  '/help': typeof AuthenticatedAppHelpRoute
+  '/notifications': typeof AuthenticatedAppNotificationsRoute
   '/orders': typeof AuthenticatedAppOrdersRoute
   '/profile': typeof AuthenticatedAppProfileRoute
   '/referrals': typeof AuthenticatedAppReferralsRoute
+  '/settings': typeof AuthenticatedAppSettingsRoute
   '/api/public/paypal-callback': typeof ApiPublicPaypalCallbackRoute
   '/api/public/settings': typeof ApiPublicSettingsRoute
   '/admin/ai-audit': typeof AuthenticatedAdminAdminAiAuditRoute
@@ -491,9 +522,13 @@ export interface FileRoutesByTo {
   '/blog': typeof BlogIndexRoute
   '/checkout': typeof AuthenticatedAppCheckoutRouteWithChildren
   '/dashboard': typeof AuthenticatedAppDashboardRoute
+  '/downloads': typeof AuthenticatedAppDownloadsRoute
+  '/help': typeof AuthenticatedAppHelpRoute
+  '/notifications': typeof AuthenticatedAppNotificationsRoute
   '/orders': typeof AuthenticatedAppOrdersRoute
   '/profile': typeof AuthenticatedAppProfileRoute
   '/referrals': typeof AuthenticatedAppReferralsRoute
+  '/settings': typeof AuthenticatedAppSettingsRoute
   '/api/public/paypal-callback': typeof ApiPublicPaypalCallbackRoute
   '/api/public/settings': typeof ApiPublicSettingsRoute
   '/admin/ai-audit': typeof AuthenticatedAdminAdminAiAuditRoute
@@ -555,9 +590,13 @@ export interface FileRoutesById {
   '/blog/': typeof BlogIndexRoute
   '/_authenticated/_app/checkout': typeof AuthenticatedAppCheckoutRouteWithChildren
   '/_authenticated/_app/dashboard': typeof AuthenticatedAppDashboardRoute
+  '/_authenticated/_app/downloads': typeof AuthenticatedAppDownloadsRoute
+  '/_authenticated/_app/help': typeof AuthenticatedAppHelpRoute
+  '/_authenticated/_app/notifications': typeof AuthenticatedAppNotificationsRoute
   '/_authenticated/_app/orders': typeof AuthenticatedAppOrdersRoute
   '/_authenticated/_app/profile': typeof AuthenticatedAppProfileRoute
   '/_authenticated/_app/referrals': typeof AuthenticatedAppReferralsRoute
+  '/_authenticated/_app/settings': typeof AuthenticatedAppSettingsRoute
   '/api/public/paypal-callback': typeof ApiPublicPaypalCallbackRoute
   '/api/public/settings': typeof ApiPublicSettingsRoute
   '/_authenticated/_admin/admin/ai-audit': typeof AuthenticatedAdminAdminAiAuditRoute
@@ -617,9 +656,13 @@ export interface FileRouteTypes {
     | '/blog/'
     | '/checkout'
     | '/dashboard'
+    | '/downloads'
+    | '/help'
+    | '/notifications'
     | '/orders'
     | '/profile'
     | '/referrals'
+    | '/settings'
     | '/api/public/paypal-callback'
     | '/api/public/settings'
     | '/admin/ai-audit'
@@ -677,9 +720,13 @@ export interface FileRouteTypes {
     | '/blog'
     | '/checkout'
     | '/dashboard'
+    | '/downloads'
+    | '/help'
+    | '/notifications'
     | '/orders'
     | '/profile'
     | '/referrals'
+    | '/settings'
     | '/api/public/paypal-callback'
     | '/api/public/settings'
     | '/admin/ai-audit'
@@ -740,9 +787,13 @@ export interface FileRouteTypes {
     | '/blog/'
     | '/_authenticated/_app/checkout'
     | '/_authenticated/_app/dashboard'
+    | '/_authenticated/_app/downloads'
+    | '/_authenticated/_app/help'
+    | '/_authenticated/_app/notifications'
     | '/_authenticated/_app/orders'
     | '/_authenticated/_app/profile'
     | '/_authenticated/_app/referrals'
+    | '/_authenticated/_app/settings'
     | '/api/public/paypal-callback'
     | '/api/public/settings'
     | '/_authenticated/_admin/admin/ai-audit'
@@ -927,6 +978,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ApiPublicPaypalCallbackRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/_authenticated/_app/settings': {
+      id: '/_authenticated/_app/settings'
+      path: '/settings'
+      fullPath: '/settings'
+      preLoaderRoute: typeof AuthenticatedAppSettingsRouteImport
+      parentRoute: typeof AuthenticatedAppRoute
+    }
     '/_authenticated/_app/referrals': {
       id: '/_authenticated/_app/referrals'
       path: '/referrals'
@@ -946,6 +1004,27 @@ declare module '@tanstack/react-router' {
       path: '/orders'
       fullPath: '/orders'
       preLoaderRoute: typeof AuthenticatedAppOrdersRouteImport
+      parentRoute: typeof AuthenticatedAppRoute
+    }
+    '/_authenticated/_app/notifications': {
+      id: '/_authenticated/_app/notifications'
+      path: '/notifications'
+      fullPath: '/notifications'
+      preLoaderRoute: typeof AuthenticatedAppNotificationsRouteImport
+      parentRoute: typeof AuthenticatedAppRoute
+    }
+    '/_authenticated/_app/help': {
+      id: '/_authenticated/_app/help'
+      path: '/help'
+      fullPath: '/help'
+      preLoaderRoute: typeof AuthenticatedAppHelpRouteImport
+      parentRoute: typeof AuthenticatedAppRoute
+    }
+    '/_authenticated/_app/downloads': {
+      id: '/_authenticated/_app/downloads'
+      path: '/downloads'
+      fullPath: '/downloads'
+      preLoaderRoute: typeof AuthenticatedAppDownloadsRouteImport
       parentRoute: typeof AuthenticatedAppRoute
     }
     '/_authenticated/_app/dashboard': {
@@ -1328,9 +1407,13 @@ const AuthenticatedAppCheckoutRouteWithChildren =
 interface AuthenticatedAppRouteChildren {
   AuthenticatedAppCheckoutRoute: typeof AuthenticatedAppCheckoutRouteWithChildren
   AuthenticatedAppDashboardRoute: typeof AuthenticatedAppDashboardRoute
+  AuthenticatedAppDownloadsRoute: typeof AuthenticatedAppDownloadsRoute
+  AuthenticatedAppHelpRoute: typeof AuthenticatedAppHelpRoute
+  AuthenticatedAppNotificationsRoute: typeof AuthenticatedAppNotificationsRoute
   AuthenticatedAppOrdersRoute: typeof AuthenticatedAppOrdersRoute
   AuthenticatedAppProfileRoute: typeof AuthenticatedAppProfileRoute
   AuthenticatedAppReferralsRoute: typeof AuthenticatedAppReferralsRoute
+  AuthenticatedAppSettingsRoute: typeof AuthenticatedAppSettingsRoute
   AuthenticatedAppBooksNewRoute: typeof AuthenticatedAppBooksNewRoute
   AuthenticatedAppBooksIndexRoute: typeof AuthenticatedAppBooksIndexRoute
   AuthenticatedAppBooksBookIdInterviewRoute: typeof AuthenticatedAppBooksBookIdInterviewRoute
@@ -1343,9 +1426,13 @@ interface AuthenticatedAppRouteChildren {
 const AuthenticatedAppRouteChildren: AuthenticatedAppRouteChildren = {
   AuthenticatedAppCheckoutRoute: AuthenticatedAppCheckoutRouteWithChildren,
   AuthenticatedAppDashboardRoute: AuthenticatedAppDashboardRoute,
+  AuthenticatedAppDownloadsRoute: AuthenticatedAppDownloadsRoute,
+  AuthenticatedAppHelpRoute: AuthenticatedAppHelpRoute,
+  AuthenticatedAppNotificationsRoute: AuthenticatedAppNotificationsRoute,
   AuthenticatedAppOrdersRoute: AuthenticatedAppOrdersRoute,
   AuthenticatedAppProfileRoute: AuthenticatedAppProfileRoute,
   AuthenticatedAppReferralsRoute: AuthenticatedAppReferralsRoute,
+  AuthenticatedAppSettingsRoute: AuthenticatedAppSettingsRoute,
   AuthenticatedAppBooksNewRoute: AuthenticatedAppBooksNewRoute,
   AuthenticatedAppBooksIndexRoute: AuthenticatedAppBooksIndexRoute,
   AuthenticatedAppBooksBookIdInterviewRoute:

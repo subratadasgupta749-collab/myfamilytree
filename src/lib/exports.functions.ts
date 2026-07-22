@@ -524,3 +524,30 @@ export const deleteExport = createServerFn({ method: "POST" })
     if (error) throw new Error(error.message);
     return { ok: true };
   });
+
+export const listAllMyExports = createServerFn({ method: "GET" })
+  .middleware([requireSupabaseAuth])
+  .handler(async ({ context }) => {
+    const { data: rows, error } = await context.supabase
+      .from("book_exports")
+      .select("id, book_id, kind, filename, storage_path, created_at, size_bytes, books(name)")
+      .eq("user_id", context.userId)
+      .order("created_at", { ascending: false });
+    if (error) throw new Error(error.message);
+
+    const paths = (rows ?? []).map((r: any) => r.storage_path);
+    let urlMap = new Map<string, string>();
+    if (paths.length > 0) {
+      const { data: signed } = await context.supabase.storage
+        .from("book-exports")
+        .createSignedUrls(paths, 60 * 60);
+      urlMap = new Map(
+        (signed ?? []).map((s: any) => [s.path as string, s.signedUrl as string]),
+      );
+    }
+    return (rows ?? []).map((r: any) => ({
+      ...r,
+      book_name: r.books?.name ?? "Family History Book",
+      url: urlMap.get(r.storage_path) ?? null,
+    }));
+  });
