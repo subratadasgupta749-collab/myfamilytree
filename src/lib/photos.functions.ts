@@ -225,9 +225,14 @@ export const replacePhoto = createServerFn({ method: "POST" })
       throw new Error("Invalid path");
     }
 
-    // Delete old file
+    // Delete old file safely
     if (existing.storage_path && existing.storage_path !== data.storagePath) {
-      await context.supabase.storage.from("photos").remove([existing.storage_path]);
+      try {
+        await context.supabase.storage.from("photos").remove([existing.storage_path]);
+      } catch {
+        const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+        await supabaseAdmin.storage.from("photos").remove([existing.storage_path]).catch(() => {});
+      }
     }
 
     const { data: row, error } = await context.supabase

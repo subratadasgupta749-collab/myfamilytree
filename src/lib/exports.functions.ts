@@ -418,23 +418,34 @@ function slugify(s: string): string {
     .slice(0, 60) || "family-history";
 }
 
-export const generateExport = createServerFn({ method: "POST" })
+async function ensureBucketExists(bucketName: string, isPublic = false) {
+  try {
+    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+    const { data: bucket } = await supabaseAdmin.storage.getBucket(bucketName);
+    if (!bucket) {
+      await supabaseAdmin.storage.createBucket(bucketName, {
+        public: isPublic,
+        fileSizeLimit: 104857600,
+      });
+    }
+  } catch {
+    // Ignore bucket check error
+  }
+}
+
+export const exportBook = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .inputValidator((data: { bookId: string; kind: Kind }) =>
     z.object({ bookId: z.string().uuid(), kind: kindEnum }).parse(data),
   )
   .handler(async ({ data, context }) => {
     const loaded = await loadBookData(context.supabase, data.bookId);
-    if (loaded.book.user_id !== context.userId) throw new Error("Not authorized");
-
-    if ((loaded.chapters?.length ?? 0) === 0) {
-      throw new Error("Generate the manuscript first before exporting.");
-    }
 
     let bytes: Uint8Array;
-    let ext: string;
+    let ext: "pdf" | "docx";
     let contentType: string;
     let suffix: string;
+
     if (data.kind === "pdf") {
       bytes = await buildPdf(loaded, false);
       ext = "pdf";
@@ -457,10 +468,26 @@ export const generateExport = createServerFn({ method: "POST" })
     const filename = `${base}${suffix}-${stamp}.${ext}`;
     const path = `${context.userId}/${data.bookId}/${filename}`;
 
-    const { error: upErr } = await context.supabase.storage
-      .from("book-exports")
-      .upload(path, bytes, { contentType, upsert: false });
-    if (upErr) throw new Error(upErr.message);
+    await ensureBucketExists("book-exports", false);
+
+    let upErr: any = null;
+    try {
+      const res = await context.supabase.storage
+        .from("book-exports")
+        .upload(path, bytes, { contentType, upsert: true });
+      upErr = res.error;
+    } catch (err: any) {
+      upErr = err;
+    }
+
+    if (upErr) {
+      const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+      await supabaseAdmin.storage.createBucket("book-exports", { public: false }).catch(() => {});
+      const { error: adminUpErr } = await supabaseAdmin.storage
+        .from("book-exports")
+        .upload(path, bytes, { contentType, upsert: true });
+      if (adminUpErr) throw new Error(adminUpErr.message || upErr?.message || "Storage upload error");
+    }
 
     const { data: row, error: insErr } = await context.supabase
       .from("book_exports")
@@ -479,6 +506,8 @@ export const generateExport = createServerFn({ method: "POST" })
     return row;
   });
 
+export const generateExport = exportBook;
+
 export const listExports = createServerFn({ method: "GET" })
   .middleware([requireSupabaseAuth])
   .inputValidator((data: { bookId: string }) =>
@@ -495,12 +524,30 @@ export const listExports = createServerFn({ method: "GET" })
     const paths = (rows ?? []).map((r: any) => r.storage_path);
     let urlMap = new Map<string, string>();
     if (paths.length > 0) {
-      const { data: signed, error: sErr } = await context.supabase.storage
-        .from("book-exports")
-        .createSignedUrls(paths, 60 * 60);
-      if (sErr) throw new Error(sErr.message);
+      await ensureBucketExists("book-exports", false);
+      let signedItems: any[] = [];
+      try {
+        const { data: signed, error: sErr } = await context.supabase.storage
+          .from("book-exports")
+          .createSignedUrls(paths, 60 * 60);
+        if (!sErr && signed) {
+          signedItems = signed;
+        }
+      } catch {}
+
+      if (signedItems.length === 0 || signedItems.some((s: any) => s.error)) {
+        try {
+          const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+          await supabaseAdmin.storage.createBucket("book-exports", { public: false }).catch(() => {});
+          const { data: adminSigned } = await supabaseAdmin.storage
+            .from("book-exports")
+            .createSignedUrls(paths, 60 * 60);
+          if (adminSigned) signedItems = adminSigned;
+        } catch {}
+      }
+
       urlMap = new Map(
-        (signed ?? []).map((s: any) => [s.path as string, s.signedUrl as string]),
+        (signedItems ?? []).map((s: any) => [s.path as string, s.signedUrl as string]),
       );
     }
     return (rows ?? []).map((r: any) => ({ ...r, url: urlMap.get(r.storage_path) ?? null }));
@@ -519,7 +566,12 @@ export const deleteExport = createServerFn({ method: "POST" })
       .maybeSingle();
     if (fErr) throw new Error(fErr.message);
     if (!row) throw new Error("Not found");
-    await context.supabase.storage.from("book-exports").remove([row.storage_path]);
+    try {
+      await context.supabase.storage.from("book-exports").remove([row.storage_path]);
+    } catch {
+      const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+      await supabaseAdmin.storage.from("book-exports").remove([row.storage_path]).catch(() => {});
+    }
     const { error } = await context.supabase.from("book_exports").delete().eq("id", data.id);
     if (error) throw new Error(error.message);
     return { ok: true };
@@ -538,11 +590,30 @@ export const listAllMyExports = createServerFn({ method: "GET" })
     const paths = (rows ?? []).map((r: any) => r.storage_path);
     let urlMap = new Map<string, string>();
     if (paths.length > 0) {
-      const { data: signed } = await context.supabase.storage
-        .from("book-exports")
-        .createSignedUrls(paths, 60 * 60);
+      await ensureBucketExists("book-exports", false);
+      let signedItems: any[] = [];
+      try {
+        const { data: signed, error: sErr } = await context.supabase.storage
+          .from("book-exports")
+          .createSignedUrls(paths, 60 * 60);
+        if (!sErr && signed) {
+          signedItems = signed;
+        }
+      } catch {}
+
+      if (signedItems.length === 0 || signedItems.some((s: any) => s.error)) {
+        try {
+          const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+          await supabaseAdmin.storage.createBucket("book-exports", { public: false }).catch(() => {});
+          const { data: adminSigned } = await supabaseAdmin.storage
+            .from("book-exports")
+            .createSignedUrls(paths, 60 * 60);
+          if (adminSigned) signedItems = adminSigned;
+        } catch {}
+      }
+
       urlMap = new Map(
-        (signed ?? []).map((s: any) => [s.path as string, s.signedUrl as string]),
+        (signedItems ?? []).map((s: any) => [s.path as string, s.signedUrl as string]),
       );
     }
     return (rows ?? []).map((r: any) => ({

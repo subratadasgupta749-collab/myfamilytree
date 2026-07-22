@@ -1,4 +1,4 @@
-﻿
+
 -- profiles
 create table public.profiles (
   id uuid primary key references auth.users(id) on delete cascade,
@@ -328,6 +328,21 @@ CREATE POLICY "Users manage their own exports"
   WITH CHECK (auth.uid() = user_id);
 
 CREATE INDEX book_exports_book_id_idx ON public.book_exports(book_id, created_at DESC);
+
+-- storage.buckets inserts
+INSERT INTO storage.buckets (id, name, public, file_size_limit)
+VALUES
+  ('book-exports', 'book-exports', false, 104857600),
+  ('photos', 'photos', true, 26214400),
+  ('blog-images', 'blog-images', true, 10485760),
+  ('media', 'media', true, 52428800),
+  ('documents', 'documents', false, 104857600),
+  ('covers', 'covers', true, 26214400),
+  ('manuscripts', 'manuscripts', false, 104857600),
+  ('exports', 'exports', false, 209715200),
+  ('avatars', 'avatars', true, 10485760),
+  ('support-attachments', 'support-attachments', false, 20971520)
+ON CONFLICT (id) DO UPDATE SET public = EXCLUDED.public;
 
 -- storage.objects policies for the book-exports bucket
 CREATE POLICY "Users read their own book exports"
