@@ -77,7 +77,7 @@ function PreviewPage() {
 
   const genMutation = useMutation({
     mutationFn: (kind: "pdf" | "docx" | "print_pdf") =>
-      generateFn({ data: { bookId, kind } }),
+      generateFn({ data: { bookId, kind, theme: themeId } }),
     onSuccess: () => {
       toast.success("Export ready");
       queryClient.invalidateQueries({ queryKey: ["exports", bookId] });

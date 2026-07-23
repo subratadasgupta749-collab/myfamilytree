@@ -73,7 +73,7 @@ async function loadBookData(supabase: any, bookId: string) {
   };
 }
 
-// --------- PDF ---------
+// --------- PDF Engine ---------
 
 function wrapText(text: string, font: any, size: number, maxWidth: number): string[] {
   const words = text.replace(/\r/g, "").split(/(\s+)/);
@@ -90,7 +90,6 @@ function wrapText(text: string, font: any, size: number, maxWidth: number): stri
     }
   }
   if (cur.length) lines.push(cur.trimEnd());
-  // Split explicit newlines further
   const out: string[] = [];
   for (const l of lines) {
     const parts = l.split("\n");
@@ -102,11 +101,18 @@ function wrapText(text: string, font: any, size: number, maxWidth: number): stri
 async function buildPdf(
   data: Awaited<ReturnType<typeof loadBookData>>,
   print: boolean,
+  activeThemeOverride?: string,
 ): Promise<Uint8Array> {
   const doc = await PDFDocument.create();
+
+  // Embed Serif & Sans fonts
   const serif = await doc.embedFont(StandardFonts.TimesRoman);
   const serifBold = await doc.embedFont(StandardFonts.TimesRomanBold);
   const serifItalic = await doc.embedFont(StandardFonts.TimesRomanItalic);
+
+  const sans = await doc.embedFont(StandardFonts.Helvetica);
+  const sansBold = await doc.embedFont(StandardFonts.HelveticaBold);
+  const sansOblique = await doc.embedFont(StandardFonts.HelveticaOblique);
 
   // Trim size 6x9 inches (432x648 pts); print-ready adds 0.125" bleed
   const trimW = 432;
@@ -115,8 +121,13 @@ async function buildPdf(
   const pageW = trimW + bleed * 2;
   const pageH = trimH + bleed * 2;
 
-  const themeId = (data.manuscript?.theme ?? "classic") as string;
+  const themeId = (activeThemeOverride || data.manuscript?.theme || "classic") as string;
   const palette = THEME_PALETTES[themeId] ?? THEME_PALETTES.classic;
+
+  const isSansTheme = ["modern", "magazine_style", "luxury_minimal"].includes(themeId);
+  const mainFont = isSansTheme ? sans : serif;
+  const mainFontBold = isSansTheme ? sansBold : serifBold;
+  const mainFontItalic = isSansTheme ? sansOblique : serifItalic;
 
   const marginX = 54 + bleed;
   const marginTop = 72 + bleed;
@@ -162,12 +173,12 @@ async function buildPdf(
   const newPage = () => {
     // Footer page number
     const label = String(pageNum);
-    const w = serif.widthOfTextAtSize(label, 9);
+    const w = mainFont.widthOfTextAtSize(label, 9);
     page.drawText(label, {
       x: (pageW - w) / 2,
       y: bleed + 36,
       size: 9,
-      font: serif,
+      font: mainFont,
       color: mutedColor,
     });
     page = doc.addPage([pageW, pageH]);
@@ -184,7 +195,7 @@ async function buildPdf(
     text: string,
     opts: { font?: any; size?: number; color?: any; align?: "left" | "center"; leading?: number; spaceAfter?: number } = {},
   ) => {
-    const font = opts.font ?? serif;
+    const font = opts.font ?? mainFont;
     const size = opts.size ?? 11;
     const color = opts.color ?? inkColor;
     const leading = opts.leading ?? size * 1.5;
@@ -202,24 +213,126 @@ async function buildPdf(
     }
   };
 
-  // ---- Cover ----
-  cursorY = pageH * 0.66;
-  drawParagraph(data.book.name || "A Family History", {
-    font: serifBold,
-    size: 34,
-    color: accentColor,
-    align: "center",
-    leading: 40,
-    spaceAfter: 20,
-  });
-  drawParagraph("A Family History", {
-    font: serifItalic,
-    size: 14,
-    color: mutedColor,
-    align: "center",
-    leading: 18,
-    spaceAfter: 40,
-  });
+  const drawDivider = () => {
+    ensureSpace(20);
+    if (themeId === "classic" || themeId === "heritage") {
+      page.drawLine({
+        start: { x: marginX + 40, y: cursorY - 10 },
+        end: { x: pageW - marginX - 40, y: cursorY - 10 },
+        thickness: 1,
+        color: accentColor,
+      });
+      cursorY -= 20;
+    } else if (themeId === "modern" || themeId === "magazine_style") {
+      page.drawRectangle({
+        x: marginX,
+        y: cursorY - 6,
+        width: 40,
+        height: 3,
+        color: accentColor,
+      });
+      cursorY -= 16;
+    } else if (themeId === "leather_journal" || themeId === "scrapbook_memories") {
+      page.drawLine({
+        start: { x: marginX, y: cursorY - 10 },
+        end: { x: pageW - marginX, y: cursorY - 10 },
+        thickness: 1,
+        color: mutedColor,
+        dashArray: [4, 4],
+      });
+      cursorY -= 20;
+    } else if (themeId === "coffee_table") {
+      page.drawRectangle({
+        x: marginX,
+        y: cursorY - 4,
+        width: contentW,
+        height: 2,
+        color: accentColor,
+      });
+      cursorY -= 16;
+    } else {
+      page.drawLine({
+        start: { x: marginX + 20, y: cursorY - 10 },
+        end: { x: pageW - marginX - 20, y: cursorY - 10 },
+        thickness: 0.5,
+        color: mutedColor,
+      });
+      cursorY -= 18;
+    }
+  };
+
+  // ---- Cover Page ----
+  if (themeId === "coffee_table") {
+    cursorY = pageH * 0.6;
+    drawParagraph(data.book.name || "A Family History", {
+      font: mainFontBold,
+      size: 36,
+      color: accentColor,
+      align: "center",
+      leading: 42,
+      spaceAfter: 16,
+    });
+    drawParagraph("HEIRLOOM PHOTOGRAPHY & BIOGRAPHY", {
+      font: mainFont,
+      size: 10,
+      color: mutedColor,
+      align: "center",
+      leading: 14,
+      spaceAfter: 40,
+    });
+  } else if (themeId === "heritage") {
+    cursorY = pageH * 0.65;
+    drawParagraph("★ THE CHRONICLES OF OUR LEGACY ★", {
+      font: mainFontItalic,
+      size: 10,
+      color: accentColor,
+      align: "center",
+      leading: 14,
+      spaceAfter: 20,
+    });
+    drawParagraph(data.book.name || "A Family History", {
+      font: mainFontBold,
+      size: 32,
+      color: inkColor,
+      align: "center",
+      leading: 38,
+      spaceAfter: 16,
+    });
+    drawDivider();
+  } else if (themeId === "magazine_style") {
+    cursorY = pageH * 0.7;
+    page.drawRectangle({ x: marginX, y: cursorY, width: 110, height: 18, color: accentColor });
+    page.drawText("SPECIAL EDITION", { x: marginX + 8, y: cursorY + 5, size: 8, font: mainFontBold, color: rgb(1, 1, 1) });
+    cursorY -= 30;
+    drawParagraph(data.book.name || "A Family History", {
+      font: mainFontBold,
+      size: 36,
+      color: inkColor,
+      align: "left",
+      leading: 42,
+      spaceAfter: 20,
+    });
+  } else {
+    cursorY = pageH * 0.66;
+    drawParagraph(data.book.name || "A Family History", {
+      font: mainFontBold,
+      size: 34,
+      color: accentColor,
+      align: "center",
+      leading: 40,
+      spaceAfter: 20,
+    });
+    drawParagraph("A Family History Memoir", {
+      font: mainFontItalic,
+      size: 14,
+      color: mutedColor,
+      align: "center",
+      leading: 18,
+      spaceAfter: 40,
+    });
+    drawDivider();
+  }
+
   if (data.book.date_of_birth || data.book.country) {
     const meta = [data.book.date_of_birth, data.book.country].filter(Boolean).join(" · ");
     drawParagraph(meta, { size: 11, color: mutedColor, align: "center" });
@@ -228,39 +341,72 @@ async function buildPdf(
 
   // ---- Introduction ----
   if (data.manuscript?.introduction) {
-    drawParagraph("Introduction", { font: serifBold, size: 22, color: accentColor, leading: 28, spaceAfter: 16 });
+    drawParagraph("Introduction", { font: mainFontBold, size: 22, color: accentColor, leading: 28, spaceAfter: 16 });
     drawParagraph(data.manuscript.introduction, { size: 11, leading: 17, spaceAfter: 10 });
     newPage();
   }
 
   // ---- Chapters ----
   for (const ch of data.chapters) {
-    drawParagraph(`Chapter ${ch.position}`, { font: serifItalic, size: 11, color: mutedColor, leading: 14, spaceAfter: 4 });
-    drawParagraph(ch.title || ch.topic, { font: serifBold, size: 22, color: accentColor, leading: 28, spaceAfter: 16 });
+    drawParagraph(`Chapter ${ch.position}`, { font: mainFontItalic, size: 11, color: mutedColor, leading: 14, spaceAfter: 4 });
+    drawParagraph(ch.title || ch.topic, { font: mainFontBold, size: 22, color: accentColor, leading: 28, spaceAfter: 16 });
+    drawDivider();
 
     if (ch.narrative) {
-      drawParagraph(ch.narrative, { size: 11, leading: 17, spaceAfter: 8 });
+      drawParagraph(ch.narrative, { size: 11, leading: 17, spaceAfter: 10 });
     }
 
     if (Array.isArray(ch.timeline) && ch.timeline.length > 0) {
-      ensureSpace(30);
-      drawParagraph("Timeline", { font: serifBold, size: 13, color: accentColor, leading: 18, spaceAfter: 6 });
+      ensureSpace(40);
+      drawParagraph("Chronological Timeline", { font: mainFontBold, size: 13, color: accentColor, leading: 18, spaceAfter: 8 });
       for (const t of ch.timeline) {
-        drawParagraph(`${t.year} — ${t.event}`, { size: 10.5, color: mutedColor, leading: 15, spaceAfter: 2 });
+        ensureSpace(18);
+        page.drawCircle({
+          x: marginX + 6,
+          y: cursorY - 6,
+          size: 3,
+          color: accentColor,
+        });
+        const text = `${t.year} — ${t.event}`;
+        const lines = wrapText(text, mainFont, 10.5, contentW - 20);
+        for (const line of lines) {
+          ensureSpace(15);
+          page.drawText(line, { x: marginX + 18, y: cursorY - 10, size: 10.5, font: mainFont, color: inkColor });
+          cursorY -= 15;
+        }
+        cursorY -= 4;
       }
     }
 
     if (Array.isArray(ch.quotes) && ch.quotes.length > 0) {
       for (const q of ch.quotes) {
         if (!q?.trim()) continue;
-        ensureSpace(40);
-        drawParagraph(`"${q.trim()}"`, {
-          font: serifItalic,
-          size: 12,
-          color: accentColor,
-          leading: 18,
-          spaceAfter: 6,
-        });
+        ensureSpace(50);
+        if (themeId === "magazine_style" || themeId === "modern") {
+          page.drawRectangle({
+            x: marginX,
+            y: cursorY - 30,
+            width: 3,
+            height: 30,
+            color: accentColor,
+          });
+          const lines = wrapText(`"${q.trim()}"`, mainFontItalic, 11, contentW - 16);
+          for (const line of lines) {
+            ensureSpace(16);
+            page.drawText(line, { x: marginX + 12, y: cursorY - 11, size: 11, font: mainFontItalic, color: inkColor });
+            cursorY -= 16;
+          }
+          cursorY -= 12;
+        } else {
+          drawParagraph(`"${q.trim()}"`, {
+            font: mainFontItalic,
+            size: 12,
+            color: accentColor,
+            align: "center",
+            leading: 18,
+            spaceAfter: 12,
+          });
+        }
       }
     }
     newPage();
@@ -268,19 +414,19 @@ async function buildPdf(
 
   // ---- Ending ----
   if (data.manuscript?.ending) {
-    drawParagraph("Ending Message", { font: serifBold, size: 22, color: accentColor, leading: 28, spaceAfter: 16 });
+    drawParagraph("Ending Message", { font: mainFontBold, size: 22, color: accentColor, leading: 28, spaceAfter: 16 });
     drawParagraph(data.manuscript.ending, { size: 11, leading: 17, spaceAfter: 10 });
   }
 
   // Final footer
   {
     const label = String(pageNum);
-    const w = serif.widthOfTextAtSize(label, 9);
+    const w = mainFont.widthOfTextAtSize(label, 9);
     page.drawText(label, {
       x: (pageW - w) / 2,
       y: bleed + 36,
       size: 9,
-      font: serif,
+      font: mainFont,
       color: mutedColor,
     });
   }
@@ -293,7 +439,6 @@ async function buildPdf(
 async function buildDocx(data: Awaited<ReturnType<typeof loadBookData>>): Promise<Uint8Array> {
   const children: Paragraph[] = [];
 
-  // Cover
   children.push(
     new Paragraph({
       alignment: AlignmentType.CENTER,
@@ -360,23 +505,27 @@ async function buildDocx(data: Awaited<ReturnType<typeof loadBookData>>): Promis
         }),
       );
     }
+
     if (Array.isArray(ch.timeline) && ch.timeline.length > 0) {
       children.push(
         new Paragraph({
-          heading: HeadingLevel.HEADING_2,
-          spacing: { before: 200, after: 120 },
-          children: [new TextRun({ text: "Timeline", bold: true, size: 28, font: "Georgia" })],
+          spacing: { before: 200, after: 100 },
+          children: [new TextRun({ text: "Timeline", bold: true, size: 26, font: "Georgia" })],
         }),
       );
       for (const t of ch.timeline) {
         children.push(
           new Paragraph({
             spacing: { after: 60 },
-            children: [new TextRun({ text: `${t.year} — ${t.event}`, size: 22, font: "Georgia" })],
+            children: [
+              new TextRun({ text: `${t.year} — `, bold: true, size: 22, font: "Georgia" }),
+              new TextRun({ text: t.event, size: 22, font: "Georgia" }),
+            ],
           }),
         );
       }
     }
+
     if (Array.isArray(ch.quotes) && ch.quotes.length > 0) {
       for (const q of ch.quotes) {
         if (!q?.trim()) continue;
@@ -384,11 +533,20 @@ async function buildDocx(data: Awaited<ReturnType<typeof loadBookData>>): Promis
           new Paragraph({
             alignment: AlignmentType.CENTER,
             spacing: { before: 200, after: 200 },
-            children: [new TextRun({ text: `“${q.trim()}”`, italics: true, size: 26, font: "Georgia" })],
+            children: [
+              new TextRun({
+                text: `"${q.trim()}"`,
+                italics: true,
+                size: 26,
+                color: "8B5E3C",
+                font: "Georgia",
+              }),
+            ],
           }),
         );
       }
     }
+
     children.push(new Paragraph({ children: [new PageBreak()] }));
   }
 
@@ -410,12 +568,23 @@ async function buildDocx(data: Awaited<ReturnType<typeof loadBookData>>): Promis
     }
   }
 
-  const doc = new DocxDocument({ sections: [{ children }] });
-  const buf = await Packer.toBuffer(doc);
-  return new Uint8Array(buf);
+  const doc = new DocxDocument({
+    sections: [
+      {
+        properties: {
+          page: {
+            margin: { top: 1440, bottom: 1440, left: 1440, right: 1440 },
+          },
+        },
+        children,
+      },
+    ],
+  });
+
+  return await Packer.toBuffer(doc);
 }
 
-// --------- Server functions ---------
+// --------- Server Exports Functions ---------
 
 function slugify(s: string): string {
   return (s || "family-history")
@@ -442,8 +611,8 @@ async function ensureBucketExists(bucketName: string, isPublic = false) {
 
 export const exportBook = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
-  .inputValidator((data: { bookId: string; kind: Kind }) =>
-    z.object({ bookId: z.string().uuid(), kind: kindEnum }).parse(data),
+  .inputValidator((data: { bookId: string; kind: Kind; theme?: string }) =>
+    z.object({ bookId: z.string().uuid(), kind: kindEnum, theme: z.string().optional() }).parse(data),
   )
   .handler(async ({ data, context }) => {
     const loaded = await loadBookData(context.supabase, data.bookId);
@@ -453,21 +622,23 @@ export const exportBook = createServerFn({ method: "POST" })
     let contentType: string;
     let suffix: string;
 
+    const activeTheme = data.theme || loaded.manuscript?.theme || "classic";
+
     if (data.kind === "pdf") {
-      bytes = await buildPdf(loaded, false);
+      bytes = await buildPdf(loaded, false, activeTheme);
       ext = "pdf";
       contentType = "application/pdf";
-      suffix = "";
+      suffix = `-${activeTheme}`;
     } else if (data.kind === "print_pdf") {
-      bytes = await buildPdf(loaded, true);
+      bytes = await buildPdf(loaded, true, activeTheme);
       ext = "pdf";
       contentType = "application/pdf";
-      suffix = "-print-ready";
+      suffix = `-${activeTheme}-print-ready`;
     } else {
       bytes = await buildDocx(loaded);
       ext = "docx";
       contentType = "application/vnd.openxmlformats-officedocument.wordprocessingml.document";
-      suffix = "";
+      suffix = `-${activeTheme}`;
     }
 
     const base = slugify(loaded.book.name);
