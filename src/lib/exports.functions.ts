@@ -379,32 +379,35 @@ async function buildPdf(
   const drawQuoteBlock = (quoteText: string) => {
     const q = sanitizeWinAnsi(quoteText.trim());
     if (!q) return;
-    ensureSpace(65);
+    ensureSpace(70);
 
-    const qLines = wrapText(`"${q}"`, mainFontItalic, 11.5, contentW - 48);
-    const textHeight = qLines.length * 17;
-    const boxHeight = textHeight + 36; // top padding for star symbol & bottom padding
+    const qLines = wrapText(`"${q}"`, mainFontItalic, 12, contentW - 48);
+    const textHeight = qLines.length * 18;
+    const boxHeight = textHeight + 42; // top padding for MEMORY NOTE header label & bottom padding
 
-    // Card Fill & Border styling per theme (Matching the user's screenshot!)
-    let cardBg = rgb(palette.bg[0] * 0.96, palette.bg[1] * 0.96, palette.bg[2] * 0.96);
-    let cardBorder = accentColor;
+    // Card Fill & Border styling matching Image 1
+    let cardBg = rgb(1, 0.98, 0.78); // Soft warm yellow sticky note fill (#FFF9C4)
+    let cardBorder = rgb(0.95, 0.78, 0.25); // Subtle yellow border (#FBC02D)
+    let headerText = "MEMORY NOTE";
+    let headerColor = rgb(0.55, 0.43, 0.12);
 
-    if (themeId === "storybook" || themeId === "family_album" || themeId === "timeline_split" || themeId === "classic") {
-      cardBg = rgb(0.91, 0.96, 1.0); // Soft Blue Pill Card Fill as shown in user screenshot
-      cardBorder = rgb(0.7, 0.88, 1.0);
-    } else if (themeId === "leather_journal" || themeId === "scrapbook_memories") {
-      cardBg = rgb(1, 0.98, 0.88); // Soft Sticky Note Yellow fill
-      cardBorder = rgb(0.95, 0.8, 0.4);
+    if (themeId === "storybook" || themeId === "family_album" || themeId === "timeline_split") {
+      cardBg = rgb(0.92, 0.96, 1.0); // Soft Blue Card Fill
+      cardBorder = rgb(0.72, 0.88, 1.0);
+      headerText = "PULL QUOTE";
+      headerColor = rgb(0.1, 0.45, 0.75);
     } else if (themeId === "coffee_table") {
       cardBg = rgb(0.14, 0.14, 0.14);
       cardBorder = rgb(0.96, 0.62, 0.04);
+      headerText = "BIOGRAPHY QUOTE";
+      headerColor = rgb(0.96, 0.62, 0.04);
     }
 
     const cardX = marginX + 6;
     const cardW = contentW - 12;
     const cardY = cursorY - boxHeight;
 
-    // Draw Quote Card Rectangle Container
+    // Draw Card Box Container (Matching Image 1 Card)
     page.drawRectangle({
       x: cardX,
       y: cardY,
@@ -415,71 +418,107 @@ async function buildPdf(
       borderWidth: 1,
     });
 
-    // Vector Sparkle Star Symbol at top center of card (100% WinAnsi Safe)
-    const cx = pageW / 2;
-    const cy = cursorY - 16;
-    page.drawLine({ start: { x: cx, y: cy - 4 }, end: { x: cx, y: cy + 4 }, thickness: 1.5, color: accentColor });
-    page.drawLine({ start: { x: cx - 4, y: cy }, end: { x: cx + 4, y: cy }, thickness: 1.5, color: accentColor });
-    page.drawLine({ start: { x: cx - 2.5, y: cy - 2.5 }, end: { x: cx + 2.5, y: cy + 2.5 }, thickness: 0.75, color: accentColor });
-    page.drawLine({ start: { x: cx - 2.5, y: cy + 2.5 }, end: { x: cx + 2.5, y: cy - 2.5 }, thickness: 0.75, color: accentColor });
+    // Draw Top Header Tag "MEMORY NOTE" in small tracking font
+    const headerW = mainFontBold.widthOfTextAtSize(headerText, 8);
+    page.drawText(headerText, {
+      x: (pageW - headerW) / 2,
+      y: cursorY - 18,
+      size: 8,
+      font: mainFontBold,
+      color: headerColor,
+    });
 
     // Draw Centered Italic Quote Lines
-    let textY = cursorY - 32;
+    let textY = cursorY - 34;
     for (const line of qLines) {
-      const lw = mainFontItalic.widthOfTextAtSize(line, 11.5);
+      const lw = mainFontItalic.widthOfTextAtSize(line, 12);
       page.drawText(line, {
         x: (pageW - lw) / 2,
         y: textY,
-        size: 11.5,
+        size: 12,
         font: mainFontItalic,
         color: inkColor,
       });
-      textY -= 17;
+      textY -= 18;
     }
 
-    cursorY -= (boxHeight + 14);
+    cursorY -= (boxHeight + 16);
   };
 
   const drawTimelineNodes = (timelineItems: Array<{ year: string; event: string }>) => {
     if (!Array.isArray(timelineItems) || timelineItems.length === 0) return;
-    ensureSpace(40);
-
-    drawParagraph("Chronological Timeline", { font: mainFontBold, size: 13, color: accentColor, leading: 18, spaceAfter: 10 });
+    ensureSpace(50);
 
     for (const item of timelineItems) {
-      ensureSpace(24);
       const yrText = sanitizeWinAnsi(String(item.year || ""));
-      const yrW = mainFontBold.widthOfTextAtSize(yrText, 9) + 12;
+      const eventText = sanitizeWinAnsi(item.event || "");
+      if (!eventText) continue;
+
+      const yrFont = mainFontBold;
+      const yrSize = 9;
+      const yrTextW = yrFont.widthOfTextAtSize(yrText, yrSize);
+      const yrBoxW = Math.max(52, yrTextW + 16);
+      const yrBoxH = Math.max(18, Math.ceil(yrText.length / 10) * 12 + 8);
+
+      const descW = contentW - yrBoxW - 28;
+      const lines = wrapText(eventText, mainFont, 10.5, descW);
+      const cardH = Math.max(38, lines.length * 16 + 18, yrBoxH + 16);
+
+      ensureSpace(cardH + 10);
+
+      const cardX = marginX;
+      const cardW = contentW;
+      const cardY = cursorY - cardH;
+
+      // Draw Timeline Card Container (Matching Image 1 Card)
+      page.drawRectangle({
+        x: cardX,
+        y: cardY,
+        width: cardW,
+        height: cardH,
+        color: rgb(1, 1, 1), // White Card Background as in Image 1
+        borderColor: rgb(0.88, 0.85, 0.78), // Subtle Card Border
+        borderWidth: 1,
+      });
+
+      // Year Pill Badge Box (Soft Beige/Gold Pill in Image 1)
+      const yrX = cardX + 12;
+      const yrY = cardY + (cardH - yrBoxH) / 2;
 
       page.drawRectangle({
-        x: marginX,
-        y: cursorY - 16,
-        width: yrW,
-        height: 16,
-        color: accentColor,
+        x: yrX,
+        y: yrY,
+        width: yrBoxW,
+        height: yrBoxH,
+        color: rgb(0.92, 0.85, 0.72), // Soft Beige/Gold Pill Fill
+        borderColor: rgb(0.82, 0.73, 0.58),
+        borderWidth: 0.5,
       });
 
+      // Draw Year Badge Text
+      const yrTextX = yrX + (yrBoxW - yrTextW) / 2;
       page.drawText(yrText, {
-        x: marginX + 6,
-        y: cursorY - 12,
+        x: yrTextX,
+        y: yrY + (yrBoxH - 9) / 2 + 2,
         size: 9,
-        font: mainFontBold,
-        color: rgb(1, 1, 1),
+        font: yrFont,
+        color: rgb(0.4, 0.25, 0.1), // Dark Warm Brown Year Text
       });
 
-      const lines = wrapText(item.event, mainFont, 10.5, contentW - yrW - 14);
-      let ey = cursorY - 13;
+      // Draw Description Event Lines beside Year Badge inside the Card
+      let textY = cardY + cardH - 16;
       for (const line of lines) {
         page.drawText(line, {
-          x: marginX + yrW + 10,
-          y: ey,
+          x: yrX + yrBoxW + 16,
+          y: textY - 9,
           size: 10.5,
           font: mainFont,
           color: inkColor,
         });
-        ey -= 15;
+        textY -= 16;
       }
-      cursorY -= Math.max(22, lines.length * 15 + 6);
+
+      cursorY -= (cardH + 12);
     }
   };
 
