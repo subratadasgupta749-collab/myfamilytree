@@ -123,6 +123,142 @@ function wrapText(text: string, font: any, size: number, maxWidth: number): stri
   return out;
 }
 
+type ThemeCardStyle = {
+  cardBg: any;
+  cardBorder: any;
+  cardInk: any;
+  headerText: string;
+  headerColor: any;
+  badgeBg: any;
+  badgeText: any;
+  styleType: "sticky_note" | "editorial_bar" | "side_bar" | "center_serif" | "calligraphy_cloud" | "highlight_box";
+};
+
+function getThemeCardStyles(themeId: string, palette: ThemePalette): ThemeCardStyle {
+  if (themeId === "coffee_table") {
+    return {
+      cardBg: rgb(0.12, 0.12, 0.12),
+      cardBorder: rgb(0.96, 0.62, 0.04),
+      cardInk: rgb(0.95, 0.95, 0.95),
+      headerText: "BIOGRAPHY QUOTE",
+      headerColor: rgb(0.96, 0.62, 0.04),
+      badgeBg: rgb(0.96, 0.62, 0.04),
+      badgeText: rgb(0, 0, 0),
+      styleType: "editorial_bar",
+    };
+  } else if (themeId === "magazine_style") {
+    return {
+      cardBg: rgb(0.98, 0.98, 0.98),
+      cardBorder: rgb(0.86, 0.15, 0.15),
+      cardInk: rgb(0.09, 0.09, 0.11),
+      headerText: "EDITORIAL CALLOUT",
+      headerColor: rgb(0.86, 0.15, 0.15),
+      badgeBg: rgb(0.86, 0.15, 0.15),
+      badgeText: rgb(1, 1, 1),
+      styleType: "editorial_bar",
+    };
+  } else if (themeId === "storybook") {
+    return {
+      cardBg: rgb(0.92, 0.96, 1.0),
+      cardBorder: rgb(0.5, 0.8, 1.0),
+      cardInk: rgb(0.12, 0.2, 0.35),
+      headerText: "STORY MEMORY",
+      headerColor: rgb(0.01, 0.52, 0.78),
+      badgeBg: rgb(0.85, 0.94, 1.0),
+      badgeText: rgb(0.01, 0.4, 0.7),
+      styleType: "calligraphy_cloud",
+    };
+  } else if (themeId === "leather_journal" || themeId === "scrapbook_memories") {
+    return {
+      cardBg: rgb(1, 0.98, 0.78),
+      cardBorder: rgb(0.95, 0.78, 0.25),
+      cardInk: rgb(0.2, 0.15, 0.08),
+      headerText: "MEMORY NOTE",
+      headerColor: rgb(0.55, 0.43, 0.12),
+      badgeBg: rgb(0.92, 0.84, 0.7),
+      badgeText: rgb(0.4, 0.25, 0.1),
+      styleType: "sticky_note",
+    };
+  } else if (themeId === "modern") {
+    return {
+      cardBg: rgb(0.96, 0.96, 0.96),
+      cardBorder: rgb(0.8, 0.8, 0.8),
+      cardInk: rgb(0.06, 0.06, 0.06),
+      headerText: "HIGHLIGHT",
+      headerColor: rgb(0.26, 0.26, 0.26),
+      badgeBg: rgb(0.26, 0.26, 0.26),
+      badgeText: rgb(1, 1, 1),
+      styleType: "side_bar",
+    };
+  } else if (themeId === "timeline_split") {
+    return {
+      cardBg: rgb(0.98, 0.98, 0.98),
+      cardBorder: rgb(0.85, 0.85, 0.85),
+      cardInk: rgb(0.15, 0.15, 0.15),
+      headerText: "MILESTONE QUOTE",
+      headerColor: rgb(0.01, 0.52, 0.78),
+      badgeBg: rgb(0.01, 0.52, 0.78),
+      badgeText: rgb(1, 1, 1),
+      styleType: "side_bar",
+    };
+  } else if (themeId === "vintage") {
+    return {
+      cardBg: rgb(0.96, 0.92, 0.84),
+      cardBorder: rgb(0.8, 0.7, 0.55),
+      cardInk: rgb(0.23, 0.15, 0.08),
+      headerText: "HISTORICAL REMINISCENCE",
+      headerColor: rgb(0.63, 0.25, 0.0),
+      badgeBg: rgb(0.85, 0.75, 0.6),
+      badgeText: rgb(0.3, 0.15, 0.05),
+      styleType: "center_serif",
+    };
+  } else if (themeId === "heritage") {
+    return {
+      cardBg: rgb(0.95, 0.93, 0.88),
+      cardBorder: rgb(0.71, 0.33, 0.04),
+      cardInk: rgb(0.06, 0.09, 0.16),
+      headerText: "HEIRLOOM MEMORY",
+      headerColor: rgb(0.71, 0.33, 0.04),
+      badgeBg: rgb(0.12, 0.15, 0.25),
+      badgeText: rgb(0.95, 0.9, 0.8),
+      styleType: "center_serif",
+    };
+  } else if (themeId === "luxury_minimal") {
+    return {
+      cardBg: rgb(0.97, 0.96, 0.95),
+      cardBorder: rgb(0.85, 0.85, 0.85),
+      cardInk: rgb(0.09, 0.09, 0.09),
+      headerText: "QUOTE",
+      headerColor: rgb(0.32, 0.32, 0.32),
+      badgeBg: rgb(0.9, 0.9, 0.9),
+      badgeText: rgb(0.1, 0.1, 0.1),
+      styleType: "editorial_bar",
+    };
+  } else if (themeId === "family_album") {
+    return {
+      cardBg: rgb(0.97, 0.96, 0.94),
+      cardBorder: rgb(0.85, 0.59, 0.04),
+      cardInk: rgb(0.12, 0.16, 0.23),
+      headerText: "FAMILY MEMORY",
+      headerColor: rgb(0.85, 0.59, 0.04),
+      badgeBg: rgb(0.85, 0.59, 0.04),
+      badgeText: rgb(1, 1, 1),
+      styleType: "highlight_box",
+    };
+  } else {
+    return {
+      cardBg: rgb(0.98, 0.97, 0.94),
+      cardBorder: rgb(0.85, 0.75, 0.55),
+      cardInk: rgb(0.11, 0.1, 0.09),
+      headerText: "MEMOIR QUOTE",
+      headerColor: rgb(0.71, 0.46, 0.04),
+      badgeBg: rgb(0.71, 0.46, 0.04),
+      badgeText: rgb(1, 1, 1),
+      styleType: "center_serif",
+    };
+  }
+}
+
 async function buildPdf(
   data: Awaited<ReturnType<typeof loadBookData>>,
   print: boolean,
@@ -381,54 +517,49 @@ async function buildPdf(
     if (!q) return;
     ensureSpace(70);
 
+    const cardStyles = getThemeCardStyles(themeId, palette);
+
     const qLines = wrapText(`"${q}"`, mainFontItalic, 12, contentW - 48);
     const textHeight = qLines.length * 18;
-    const boxHeight = textHeight + 42; // top padding for MEMORY NOTE header label & bottom padding
-
-    // Card Fill & Border styling matching Image 1
-    let cardBg = rgb(1, 0.98, 0.78); // Soft warm yellow sticky note fill (#FFF9C4)
-    let cardBorder = rgb(0.95, 0.78, 0.25); // Subtle yellow border (#FBC02D)
-    let headerText = "MEMORY NOTE";
-    let headerColor = rgb(0.55, 0.43, 0.12);
-
-    if (themeId === "storybook" || themeId === "family_album" || themeId === "timeline_split") {
-      cardBg = rgb(0.92, 0.96, 1.0); // Soft Blue Card Fill
-      cardBorder = rgb(0.72, 0.88, 1.0);
-      headerText = "PULL QUOTE";
-      headerColor = rgb(0.1, 0.45, 0.75);
-    } else if (themeId === "coffee_table") {
-      cardBg = rgb(0.14, 0.14, 0.14);
-      cardBorder = rgb(0.96, 0.62, 0.04);
-      headerText = "BIOGRAPHY QUOTE";
-      headerColor = rgb(0.96, 0.62, 0.04);
-    }
+    const boxHeight = textHeight + 42;
 
     const cardX = marginX + 6;
     const cardW = contentW - 12;
     const cardY = cursorY - boxHeight;
 
-    // Draw Card Box Container (Matching Image 1 Card)
+    // Draw Quote Card Box Container matching template!
     page.drawRectangle({
       x: cardX,
       y: cardY,
       width: cardW,
       height: boxHeight,
-      color: cardBg,
-      borderColor: cardBorder,
+      color: cardStyles.cardBg,
+      borderColor: cardStyles.cardBorder,
       borderWidth: 1,
     });
 
-    // Draw Top Header Tag "MEMORY NOTE" in small tracking font
-    const headerW = mainFontBold.widthOfTextAtSize(headerText, 8);
-    page.drawText(headerText, {
+    // Draw Side Accent Bar if styleType === 'side_bar'
+    if (cardStyles.styleType === "side_bar") {
+      page.drawRectangle({
+        x: cardX,
+        y: cardY,
+        width: 4,
+        height: boxHeight,
+        color: cardStyles.cardBorder,
+      });
+    }
+
+    // Draw Top Header Tag (e.g. "BIOGRAPHY QUOTE", "MEMORY NOTE", "EDITORIAL CALLOUT")
+    const headerW = mainFontBold.widthOfTextAtSize(cardStyles.headerText, 8);
+    page.drawText(cardStyles.headerText, {
       x: (pageW - headerW) / 2,
       y: cursorY - 18,
       size: 8,
       font: mainFontBold,
-      color: headerColor,
+      color: cardStyles.headerColor,
     });
 
-    // Draw Centered Italic Quote Lines
+    // Draw Centered Italic Quote Lines in Template Ink Color!
     let textY = cursorY - 34;
     for (const line of qLines) {
       const lw = mainFontItalic.widthOfTextAtSize(line, 12);
@@ -437,7 +568,7 @@ async function buildPdf(
         y: textY,
         size: 12,
         font: mainFontItalic,
-        color: inkColor,
+        color: cardStyles.cardInk,
       });
       textY -= 18;
     }
@@ -448,6 +579,8 @@ async function buildPdf(
   const drawTimelineNodes = (timelineItems: Array<{ year: string; event: string }>) => {
     if (!Array.isArray(timelineItems) || timelineItems.length === 0) return;
     ensureSpace(50);
+
+    const cardStyles = getThemeCardStyles(themeId, palette);
 
     for (const item of timelineItems) {
       const yrText = sanitizeWinAnsi(String(item.year || ""));
@@ -470,18 +603,18 @@ async function buildPdf(
       const cardW = contentW;
       const cardY = cursorY - cardH;
 
-      // Draw Timeline Card Container (Matching Image 1 Card)
+      // Draw Timeline Card Container using Template-Specific Background & Border Colors!
       page.drawRectangle({
         x: cardX,
         y: cardY,
         width: cardW,
         height: cardH,
-        color: rgb(1, 1, 1), // White Card Background as in Image 1
-        borderColor: rgb(0.88, 0.85, 0.78), // Subtle Card Border
+        color: cardStyles.cardBg,
+        borderColor: cardStyles.cardBorder,
         borderWidth: 1,
       });
 
-      // Year Pill Badge Box (Soft Beige/Gold Pill in Image 1)
+      // Year Pill Badge Box using Template-Specific Colors!
       const yrX = cardX + 12;
       const yrY = cardY + (cardH - yrBoxH) / 2;
 
@@ -490,8 +623,8 @@ async function buildPdf(
         y: yrY,
         width: yrBoxW,
         height: yrBoxH,
-        color: rgb(0.92, 0.85, 0.72), // Soft Beige/Gold Pill Fill
-        borderColor: rgb(0.82, 0.73, 0.58),
+        color: cardStyles.badgeBg,
+        borderColor: cardStyles.cardBorder,
         borderWidth: 0.5,
       });
 
@@ -502,10 +635,10 @@ async function buildPdf(
         y: yrY + (yrBoxH - 9) / 2 + 2,
         size: 9,
         font: yrFont,
-        color: rgb(0.4, 0.25, 0.1), // Dark Warm Brown Year Text
+        color: cardStyles.badgeText,
       });
 
-      // Draw Description Event Lines beside Year Badge inside the Card
+      // Draw Description Event Lines inside the Card using Template Ink Color!
       let textY = cardY + cardH - 16;
       for (const line of lines) {
         page.drawText(line, {
@@ -513,7 +646,7 @@ async function buildPdf(
           y: textY - 9,
           size: 10.5,
           font: mainFont,
-          color: inkColor,
+          color: cardStyles.cardInk,
         });
         textY -= 16;
       }
