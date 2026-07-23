@@ -73,6 +73,7 @@ function PreviewPage() {
 
   const [customization, setCustomization] = useState<CustomizationSettings>(DEFAULT_CUSTOMIZATION);
   const [activeTab, setActiveTab] = useState<"full_book" | "cover_spread" | "special_pages">("full_book");
+  const [selectedTheme, setSelectedTheme] = useState<BookThemeId | null>(null);
 
   const genMutation = useMutation({
     mutationFn: (kind: "pdf" | "docx" | "print_pdf") =>
@@ -95,7 +96,10 @@ function PreviewPage() {
 
   const themeMutation = useMutation({
     mutationFn: (theme: BookThemeId) => setThemeFn({ data: { bookId, theme } }),
-    onSuccess: () => queryClient.invalidateQueries({ queryKey: ["manuscript", bookId] }),
+    onSuccess: () => {
+      toast.success("Theme updated");
+      queryClient.invalidateQueries({ queryKey: ["manuscript", bookId] });
+    },
     onError: (e: Error) => toast.error(e.message),
   });
 
@@ -111,7 +115,7 @@ function PreviewPage() {
   const book = bookQuery.data ?? { name: "Family History Book" };
   const manuscriptData = manuscriptQuery.data ?? { manuscript: null, chapters: [] };
   const { manuscript, chapters } = manuscriptData;
-  const themeId = (manuscript?.theme ?? "classic") as BookThemeId;
+  const themeId = selectedTheme || ((manuscript?.theme ?? "classic") as BookThemeId);
   const themeConfig = TEMPLATE_CONFIGS[themeId] ?? TEMPLATE_CONFIGS.classic;
   const hasContent = (chapters?.length ?? 0) > 0;
 
@@ -206,7 +210,10 @@ function PreviewPage() {
                 return (
                   <button
                     key={t.id}
-                    onClick={() => themeMutation.mutate(t.id)}
+                    onClick={() => {
+                      setSelectedTheme(t.id);
+                      themeMutation.mutate(t.id);
+                    }}
                     className={`rounded-xl border p-3 text-left transition relative flex flex-col justify-between ${
                       isActive
                         ? "border-amber-600 bg-amber-50/60 ring-2 ring-amber-500/40"

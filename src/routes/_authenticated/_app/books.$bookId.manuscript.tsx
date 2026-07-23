@@ -52,6 +52,8 @@ function ManuscriptPage() {
   const generateFn = useServerFn(generateBook);
   const setThemeFn = useServerFn(setTheme);
 
+  const [selectedTheme, setSelectedTheme] = useState<BookThemeId | null>(null);
+
   const generateMutation = useMutation({
     mutationFn: () => generateFn({ data: { bookId } }),
     onSuccess: () => {
@@ -63,7 +65,10 @@ function ManuscriptPage() {
 
   const themeMutation = useMutation({
     mutationFn: (theme: BookThemeId) => setThemeFn({ data: { bookId, theme } }),
-    onSuccess: () => queryClient.invalidateQueries({ queryKey: ["manuscript", bookId] }),
+    onSuccess: () => {
+      toast.success("Theme updated");
+      queryClient.invalidateQueries({ queryKey: ["manuscript", bookId] });
+    },
     onError: (e: Error) => toast.error(e.message),
   });
 
@@ -77,7 +82,7 @@ function ManuscriptPage() {
   }
 
   const manuscriptData = data ?? { manuscript: null, chapters: [] };
-  const theme = (manuscriptData.manuscript?.theme ?? "classic") as BookThemeId;
+  const theme = selectedTheme || ((manuscriptData.manuscript?.theme ?? "classic") as BookThemeId);
   const hasContent = (manuscriptData.chapters?.length ?? 0) > 0;
 
   return (
@@ -118,7 +123,10 @@ function ManuscriptPage() {
             return (
               <button
                 key={t.id}
-                onClick={() => themeMutation.mutate(t.id)}
+                onClick={() => {
+                  setSelectedTheme(t.id);
+                  themeMutation.mutate(t.id);
+                }}
                 className={`rounded-2xl border p-4 text-left transition ${
                   active
                     ? "border-primary bg-primary/5 ring-2 ring-primary/40"

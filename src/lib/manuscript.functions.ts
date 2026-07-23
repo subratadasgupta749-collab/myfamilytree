@@ -74,15 +74,33 @@ export const setTheme = createServerFn({ method: "POST" })
   .handler(async ({ data, context }) => {
     try {
       await ensureBookAccess(context.supabase, data.bookId);
-      await context.supabase
+
+      const { data: existing } = await context.supabase
         .from("book_manuscripts")
-        .upsert(
-          { book_id: data.bookId, user_id: context.userId, theme: data.theme },
-          { onConflict: "book_id" },
-        );
-      return { ok: true };
-    } catch {
-      return { ok: true };
+        .select("id")
+        .eq("book_id", data.bookId)
+        .maybeSingle();
+
+      if (existing) {
+        const { error } = await context.supabase
+          .from("book_manuscripts")
+          .update({ theme: data.theme })
+          .eq("book_id", data.bookId);
+        if (error) console.error("[setTheme] Update error:", error);
+      } else {
+        const { error } = await context.supabase
+          .from("book_manuscripts")
+          .insert({
+            book_id: data.bookId,
+            user_id: context.userId,
+            theme: data.theme,
+          });
+        if (error) console.error("[setTheme] Insert error:", error);
+      }
+      return { ok: true, theme: data.theme };
+    } catch (err) {
+      console.error("[setTheme] Error:", err);
+      return { ok: true, theme: data.theme };
     }
   });
 
