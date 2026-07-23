@@ -85,10 +85,23 @@ async function loadBookData(supabase: any, bookId: string) {
   };
 }
 
-// --------- PDF Visual Design Engine ---------
+// --------- PDF WinAnsi Sanitizer & Visual Design Engine ---------
+
+function sanitizeWinAnsi(str: string): string {
+  if (!str) return "";
+  return str
+    .replace(/[\u201C\u201D\u201E\u201F\u2033\u2036]/g, '"')
+    .replace(/[\u2018\u2019\u201A\u201B\u2032\u2035]/g, "'")
+    .replace(/[\u2013\u2014]/g, "-")
+    .replace(/[\u2026]/g, "...")
+    .replace(/[\u2022\u25CF\u25CB]/g, "*")
+    .replace(/[\u2726\u2727\u2736\u2605\u2606\u2756]/g, "*")
+    .replace(/[^\x00-\xFF]/g, "");
+}
 
 function wrapText(text: string, font: any, size: number, maxWidth: number): string[] {
-  const words = text.replace(/\r/g, "").split(/(\s+)/);
+  const clean = sanitizeWinAnsi(text);
+  const words = clean.replace(/\r/g, "").split(/(\s+)/);
   const lines: string[] = [];
   let cur = "";
   for (const w of words) {
@@ -108,19 +121,6 @@ function wrapText(text: string, font: any, size: number, maxWidth: number): stri
     out.push(...parts);
   }
   return out;
-}
-
-async function fetchImageBuffer(url: string): Promise<{ bytes: Uint8Array; format: "png" | "jpg" } | null> {
-  try {
-    const res = await fetch(url);
-    if (!res.ok) return null;
-    const arrayBuffer = await res.arrayBuffer();
-    const bytes = new Uint8Array(arrayBuffer);
-    const isPng = url.toLowerCase().endsWith(".png") || (res.headers.get("content-type") || "").includes("image/png");
-    return { bytes, format: isPng ? "png" : "jpg" };
-  } catch {
-    return null;
-  }
 }
 
 async function buildPdf(
@@ -288,7 +288,8 @@ async function buildPdf(
     const size = opts.size ?? 11;
     const color = opts.color ?? inkColor;
     const leading = opts.leading ?? size * 1.5;
-    const paragraphs = text.split(/\n\n+/);
+    const cleanText = sanitizeWinAnsi(text);
+    const paragraphs = cleanText.split(/\n\n+/);
     for (const p of paragraphs) {
       const lines = wrapText(p.trim(), font, size, contentW);
       for (const line of lines) {
@@ -303,7 +304,8 @@ async function buildPdf(
   };
 
   const drawNarrativeWithDropCap = (narrativeText: string) => {
-    const paragraphs = narrativeText.split(/\n\n+/).filter((p) => p.trim().length > 0);
+    const cleanNarrative = sanitizeWinAnsi(narrativeText);
+    const paragraphs = cleanNarrative.split(/\n\n+/).filter((p) => p.trim().length > 0);
     if (paragraphs.length === 0) return;
 
     const firstP = paragraphs[0].trim();
@@ -375,11 +377,11 @@ async function buildPdf(
   };
 
   const drawQuoteBlock = (quoteText: string) => {
-    const q = quoteText.trim();
+    const q = sanitizeWinAnsi(quoteText.trim());
     if (!q) return;
     ensureSpace(65);
 
-    const qLines = wrapText(`“${q}”`, mainFontItalic, 11.5, contentW - 48);
+    const qLines = wrapText(`"${q}"`, mainFontItalic, 11.5, contentW - 48);
     const textHeight = qLines.length * 17;
     const boxHeight = textHeight + 36; // top padding for star symbol & bottom padding
 
@@ -413,16 +415,13 @@ async function buildPdf(
       borderWidth: 1,
     });
 
-    // Draw Star / Sparkles symbol at top center of card
-    const starSymbol = "✦";
-    const starW = mainFontBold.widthOfTextAtSize(starSymbol, 11);
-    page.drawText(starSymbol, {
-      x: (pageW - starW) / 2,
-      y: cursorY - 16,
-      size: 11,
-      font: mainFontBold,
-      color: accentColor,
-    });
+    // Vector Sparkle Star Symbol at top center of card (100% WinAnsi Safe)
+    const cx = pageW / 2;
+    const cy = cursorY - 16;
+    page.drawLine({ start: { x: cx, y: cy - 4 }, end: { x: cx, y: cy + 4 }, thickness: 1.5, color: accentColor });
+    page.drawLine({ start: { x: cx - 4, y: cy }, end: { x: cx + 4, y: cy }, thickness: 1.5, color: accentColor });
+    page.drawLine({ start: { x: cx - 2.5, y: cy - 2.5 }, end: { x: cx + 2.5, y: cy + 2.5 }, thickness: 0.75, color: accentColor });
+    page.drawLine({ start: { x: cx - 2.5, y: cy + 2.5 }, end: { x: cx + 2.5, y: cy - 2.5 }, thickness: 0.75, color: accentColor });
 
     // Draw Centered Italic Quote Lines
     let textY = cursorY - 32;
@@ -449,7 +448,7 @@ async function buildPdf(
 
     for (const item of timelineItems) {
       ensureSpace(24);
-      const yrText = String(item.year || "");
+      const yrText = sanitizeWinAnsi(String(item.year || ""));
       const yrW = mainFontBold.widthOfTextAtSize(yrText, 9) + 12;
 
       page.drawRectangle({
@@ -553,7 +552,7 @@ async function buildPdf(
     });
   } else if (themeId === "heritage") {
     cursorY = pageH * 0.65;
-    drawParagraph("★ THE CHRONICLES OF OUR LEGACY ★", {
+    drawParagraph("THE CHRONICLES OF OUR LEGACY", {
       font: mainFontItalic,
       size: 10,
       color: accentColor,
@@ -605,7 +604,7 @@ async function buildPdf(
   }
 
   if (data.book.date_of_birth || data.book.country) {
-    const meta = [data.book.date_of_birth, data.book.country].filter(Boolean).join(" · ");
+    const meta = [data.book.date_of_birth, data.book.country].filter(Boolean).join(" - ");
     drawParagraph(meta, { size: 11, color: mutedColor, align: "center" });
   }
   newPage();
