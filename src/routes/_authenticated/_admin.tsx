@@ -82,6 +82,7 @@ const navGroups: NavGroup[] = [
     items: [
       { to: "/admin/users", label: "Users", icon: Users },
       { to: "/admin/books", label: "Books", icon: BookOpen },
+      { to: "/admin/interview-questions", label: "Interview Questions", icon: HelpCircle, badge: "Dynamic" },
       { to: "/admin/orders", label: "Orders", icon: ShoppingBag },
       { to: "/admin/downloads", label: "Downloads", icon: HardDriveDownload },
       { to: "/admin/storage", label: "Blob Storage", icon: HardDrive, badge: "S3" },

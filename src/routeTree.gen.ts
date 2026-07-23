@@ -55,6 +55,7 @@ import { Route as AuthenticatedAdminAdminPaymentGatewaysRouteImport } from './ro
 import { Route as AuthenticatedAdminAdminOrdersRouteImport } from './routes/_authenticated/_admin/admin.orders'
 import { Route as AuthenticatedAdminAdminMessagesRouteImport } from './routes/_authenticated/_admin/admin.messages'
 import { Route as AuthenticatedAdminAdminMediaRouteImport } from './routes/_authenticated/_admin/admin.media'
+import { Route as AuthenticatedAdminAdminInterviewQuestionsRouteImport } from './routes/_authenticated/_admin/admin.interview-questions'
 import { Route as AuthenticatedAdminAdminFeatureManagerRouteImport } from './routes/_authenticated/_admin/admin.feature-manager'
 import { Route as AuthenticatedAdminAdminEmailTemplatesRouteImport } from './routes/_authenticated/_admin/admin.email-templates'
 import { Route as AuthenticatedAdminAdminEmailLogsRouteImport } from './routes/_authenticated/_admin/admin.email-logs'
@@ -339,6 +340,12 @@ const AuthenticatedAdminAdminMediaRoute =
     path: '/admin/media',
     getParentRoute: () => AuthenticatedAdminRoute,
   } as any)
+const AuthenticatedAdminAdminInterviewQuestionsRoute =
+  AuthenticatedAdminAdminInterviewQuestionsRouteImport.update({
+    id: '/admin/interview-questions',
+    path: '/admin/interview-questions',
+    getParentRoute: () => AuthenticatedAdminRoute,
+  } as any)
 const AuthenticatedAdminAdminFeatureManagerRoute =
   AuthenticatedAdminAdminFeatureManagerRouteImport.update({
     id: '/admin/feature-manager',
@@ -574,6 +581,7 @@ export interface FileRoutesByFullPath {
   '/admin/email-logs': typeof AuthenticatedAdminAdminEmailLogsRoute
   '/admin/email-templates': typeof AuthenticatedAdminAdminEmailTemplatesRoute
   '/admin/feature-manager': typeof AuthenticatedAdminAdminFeatureManagerRoute
+  '/admin/interview-questions': typeof AuthenticatedAdminAdminInterviewQuestionsRoute
   '/admin/media': typeof AuthenticatedAdminAdminMediaRoute
   '/admin/messages': typeof AuthenticatedAdminAdminMessagesRoute
   '/admin/orders': typeof AuthenticatedAdminAdminOrdersRoute
@@ -650,6 +658,7 @@ export interface FileRoutesByTo {
   '/admin/email-logs': typeof AuthenticatedAdminAdminEmailLogsRoute
   '/admin/email-templates': typeof AuthenticatedAdminAdminEmailTemplatesRoute
   '/admin/feature-manager': typeof AuthenticatedAdminAdminFeatureManagerRoute
+  '/admin/interview-questions': typeof AuthenticatedAdminAdminInterviewQuestionsRoute
   '/admin/media': typeof AuthenticatedAdminAdminMediaRoute
   '/admin/messages': typeof AuthenticatedAdminAdminMessagesRoute
   '/admin/orders': typeof AuthenticatedAdminAdminOrdersRoute
@@ -730,6 +739,7 @@ export interface FileRoutesById {
   '/_authenticated/_admin/admin/email-logs': typeof AuthenticatedAdminAdminEmailLogsRoute
   '/_authenticated/_admin/admin/email-templates': typeof AuthenticatedAdminAdminEmailTemplatesRoute
   '/_authenticated/_admin/admin/feature-manager': typeof AuthenticatedAdminAdminFeatureManagerRoute
+  '/_authenticated/_admin/admin/interview-questions': typeof AuthenticatedAdminAdminInterviewQuestionsRoute
   '/_authenticated/_admin/admin/media': typeof AuthenticatedAdminAdminMediaRoute
   '/_authenticated/_admin/admin/messages': typeof AuthenticatedAdminAdminMessagesRoute
   '/_authenticated/_admin/admin/orders': typeof AuthenticatedAdminAdminOrdersRoute
@@ -808,6 +818,7 @@ export interface FileRouteTypes {
     | '/admin/email-logs'
     | '/admin/email-templates'
     | '/admin/feature-manager'
+    | '/admin/interview-questions'
     | '/admin/media'
     | '/admin/messages'
     | '/admin/orders'
@@ -884,6 +895,7 @@ export interface FileRouteTypes {
     | '/admin/email-logs'
     | '/admin/email-templates'
     | '/admin/feature-manager'
+    | '/admin/interview-questions'
     | '/admin/media'
     | '/admin/messages'
     | '/admin/orders'
@@ -963,6 +975,7 @@ export interface FileRouteTypes {
     | '/_authenticated/_admin/admin/email-logs'
     | '/_authenticated/_admin/admin/email-templates'
     | '/_authenticated/_admin/admin/feature-manager'
+    | '/_authenticated/_admin/admin/interview-questions'
     | '/_authenticated/_admin/admin/media'
     | '/_authenticated/_admin/admin/messages'
     | '/_authenticated/_admin/admin/orders'
@@ -1337,6 +1350,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedAdminAdminMediaRouteImport
       parentRoute: typeof AuthenticatedAdminRoute
     }
+    '/_authenticated/_admin/admin/interview-questions': {
+      id: '/_authenticated/_admin/admin/interview-questions'
+      path: '/admin/interview-questions'
+      fullPath: '/admin/interview-questions'
+      preLoaderRoute: typeof AuthenticatedAdminAdminInterviewQuestionsRouteImport
+      parentRoute: typeof AuthenticatedAdminRoute
+    }
     '/_authenticated/_admin/admin/feature-manager': {
       id: '/_authenticated/_admin/admin/feature-manager'
       path: '/admin/feature-manager'
@@ -1581,6 +1601,7 @@ interface AuthenticatedAdminRouteChildren {
   AuthenticatedAdminAdminEmailLogsRoute: typeof AuthenticatedAdminAdminEmailLogsRoute
   AuthenticatedAdminAdminEmailTemplatesRoute: typeof AuthenticatedAdminAdminEmailTemplatesRoute
   AuthenticatedAdminAdminFeatureManagerRoute: typeof AuthenticatedAdminAdminFeatureManagerRoute
+  AuthenticatedAdminAdminInterviewQuestionsRoute: typeof AuthenticatedAdminAdminInterviewQuestionsRoute
   AuthenticatedAdminAdminMediaRoute: typeof AuthenticatedAdminAdminMediaRoute
   AuthenticatedAdminAdminMessagesRoute: typeof AuthenticatedAdminAdminMessagesRoute
   AuthenticatedAdminAdminOrdersRoute: typeof AuthenticatedAdminAdminOrdersRoute
@@ -1631,6 +1652,8 @@ const AuthenticatedAdminRouteChildren: AuthenticatedAdminRouteChildren = {
     AuthenticatedAdminAdminEmailTemplatesRoute,
   AuthenticatedAdminAdminFeatureManagerRoute:
     AuthenticatedAdminAdminFeatureManagerRoute,
+  AuthenticatedAdminAdminInterviewQuestionsRoute:
+    AuthenticatedAdminAdminInterviewQuestionsRoute,
   AuthenticatedAdminAdminMediaRoute: AuthenticatedAdminAdminMediaRoute,
   AuthenticatedAdminAdminMessagesRoute: AuthenticatedAdminAdminMessagesRoute,
   AuthenticatedAdminAdminOrdersRoute: AuthenticatedAdminAdminOrdersRoute,
