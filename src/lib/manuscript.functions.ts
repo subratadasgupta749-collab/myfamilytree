@@ -4,12 +4,18 @@ import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
 import { INTERVIEW_TOPICS } from "./interview.functions";
 
 export const BOOK_THEMES = [
-  { id: "classic", label: "Classic", description: "Timeless serif elegance." },
-  { id: "vintage", label: "Vintage", description: "Warm sepia, aged paper." },
-  { id: "modern", label: "Modern", description: "Clean, minimal, airy." },
-  { id: "leather_journal", label: "Leather Journal", description: "Rich leather, handwritten feel." },
-  { id: "family_album", label: "Family Album", description: "Bright, photo-forward layout." },
-  { id: "timeline_split", label: "Timeline Split", description: "Side-by-side photo and story arranged along a timeline." },
+  { id: "classic", label: "Classic", description: "Timeless serif elegance with gold accents." },
+  { id: "vintage", label: "Vintage", description: "Warm sepia tones & aged paper parchment." },
+  { id: "modern", label: "Modern", description: "Clean Swiss minimalist grid layout." },
+  { id: "leather_journal", label: "Leather Journal", description: "Rich bound leather & handwritten scripts." },
+  { id: "family_album", label: "Family Album", description: "Bright photo-forward heirloom grid." },
+  { id: "timeline_split", label: "Timeline Split", description: "Split-screen biography along a chronological ribbon." },
+  { id: "heritage", label: "Heritage", description: "Regal crests, copperplate headers & gold filigree." },
+  { id: "luxury_minimal", label: "Luxury Minimal", description: "High-contrast monograph typography & hairline margins." },
+  { id: "scrapbook_memories", label: "Scrapbook Memories", description: "Craft paper texture, taped polaroids & memory notes." },
+  { id: "coffee_table", label: "Coffee Table Book", description: "Full-bleed photography & dramatic hero typography." },
+  { id: "magazine_style", label: "Magazine Style", description: "Multi-column editorial spreads with bold kickers." },
+  { id: "storybook", label: "Storybook", description: "Fairytale drop caps, calligraphy & watercolor florals." },
 ] as const;
 
 export type BookThemeId = (typeof BOOK_THEMES)[number]["id"];

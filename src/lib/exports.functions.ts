@@ -23,11 +23,18 @@ type ThemePalette = {
 };
 
 const THEME_PALETTES: Record<string, ThemePalette> = {
-  classic: { bg: [1, 0.973, 0.949], ink: [0.13, 0.13, 0.13], accent: [0.545, 0.369, 0.235], muted: [0.4, 0.35, 0.3] },
-  vintage: { bg: [0.98, 0.93, 0.85], ink: [0.24, 0.15, 0.08], accent: [0.6, 0.35, 0.15], muted: [0.45, 0.32, 0.2] },
-  modern: { bg: [1, 1, 1], ink: [0.09, 0.09, 0.11], accent: [0.15, 0.15, 0.18], muted: [0.4, 0.4, 0.44] },
-  leather_journal: { bg: [0.96, 0.9, 0.8], ink: [0.2, 0.12, 0.06], accent: [0.36, 0.2, 0.1], muted: [0.4, 0.28, 0.18] },
-  family_album: { bg: [1, 0.988, 0.965], ink: [0.15, 0.18, 0.22], accent: [0.83, 0.69, 0.22], muted: [0.4, 0.42, 0.46] },
+  classic: { bg: [1, 0.992, 0.976], ink: [0.11, 0.1, 0.09], accent: [0.71, 0.46, 0.04], muted: [0.47, 0.44, 0.42] },
+  vintage: { bg: [0.98, 0.95, 0.88], ink: [0.23, 0.15, 0.08], accent: [0.63, 0.25, 0.0], muted: [0.55, 0.43, 0.38] },
+  modern: { bg: [1, 1, 1], ink: [0.06, 0.06, 0.06], accent: [0.26, 0.26, 0.26], muted: [0.45, 0.45, 0.45] },
+  leather_journal: { bg: [0.95, 0.91, 0.82], ink: [0.17, 0.11, 0.07], accent: [0.55, 0.28, 0.08], muted: [0.48, 0.37, 0.29] },
+  family_album: { bg: [1, 0.99, 0.97], ink: [0.12, 0.16, 0.23], accent: [0.85, 0.59, 0.04], muted: [0.39, 0.45, 0.55] },
+  timeline_split: { bg: [0.98, 0.97, 0.95], ink: [0.15, 0.15, 0.15], accent: [0.01, 0.52, 0.78], muted: [0.45, 0.45, 0.45] },
+  heritage: { bg: [0.97, 0.96, 0.93], ink: [0.06, 0.09, 0.16], accent: [0.71, 0.33, 0.04], muted: [0.28, 0.33, 0.41] },
+  luxury_minimal: { bg: [0.98, 0.97, 0.96], ink: [0.09, 0.09, 0.09], accent: [0.32, 0.32, 0.32], muted: [0.45, 0.45, 0.45] },
+  scrapbook_memories: { bg: [0.96, 0.94, 0.9], ink: [0.17, 0.17, 0.17], accent: [0.62, 0.27, 0.14], muted: [0.43, 0.43, 0.43] },
+  coffee_table: { bg: [0.07, 0.07, 0.07], ink: [0.9, 0.9, 0.9], accent: [0.96, 0.62, 0.04], muted: [0.64, 0.64, 0.64] },
+  magazine_style: { bg: [1, 1, 1], ink: [0.09, 0.09, 0.11], accent: [0.86, 0.15, 0.15], muted: [0.44, 0.44, 0.48] },
+  storybook: { bg: [1, 0.99, 0.98], ink: [0.18, 0.21, 0.28], accent: [0.01, 0.52, 0.78], muted: [0.39, 0.45, 0.55] },
 };
 
 async function loadBookData(supabase: any, bookId: string) {
