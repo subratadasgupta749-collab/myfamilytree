@@ -73,7 +73,7 @@ async function loadBookData(supabase: any, bookId: string) {
   };
 }
 
-// --------- PDF Engine ---------
+// --------- PDF Visual Design Layout Engine ---------
 
 function wrapText(text: string, font: any, size: number, maxWidth: number): string[] {
   const words = text.replace(/\r/g, "").split(/(\s+)/);
@@ -134,7 +134,12 @@ async function buildPdf(
   const marginBottom = 72 + bleed;
   const contentW = pageW - marginX * 2;
 
+  const inkColor = rgb(palette.ink[0], palette.ink[1], palette.ink[2]);
+  const accentColor = rgb(palette.accent[0], palette.accent[1], palette.accent[2]);
+  const mutedColor = rgb(palette.muted[0], palette.muted[1], palette.muted[2]);
+
   const drawPageBg = (page: any) => {
+    // Fill Page Background
     page.drawRectangle({
       x: 0,
       y: 0,
@@ -142,20 +147,83 @@ async function buildPdf(
       height: pageH,
       color: rgb(palette.bg[0], palette.bg[1], palette.bg[2]),
     });
+
+    // Template Specific Page Border / Accent Features
+    if (themeId === "classic" || themeId === "heritage") {
+      const inset = 18 + bleed;
+      page.drawRectangle({
+        x: inset,
+        y: inset,
+        width: pageW - inset * 2,
+        height: pageH - inset * 2,
+        borderColor: accentColor,
+        borderWidth: 1,
+      });
+      page.drawRectangle({
+        x: inset + 4,
+        y: inset + 4,
+        width: pageW - (inset + 4) * 2,
+        height: pageH - (inset + 4) * 2,
+        borderColor: accentColor,
+        borderWidth: 0.5,
+      });
+    } else if (themeId === "vintage") {
+      const inset = 20 + bleed;
+      const bracketLen = 24;
+      const c = accentColor;
+      page.drawLine({ start: { x: inset, y: pageH - inset }, end: { x: inset + bracketLen, y: pageH - inset }, thickness: 1.5, color: c });
+      page.drawLine({ start: { x: inset, y: pageH - inset }, end: { x: inset, y: pageH - inset - bracketLen }, thickness: 1.5, color: c });
+      page.drawLine({ start: { x: pageW - inset, y: pageH - inset }, end: { x: pageW - inset - bracketLen, y: pageH - inset }, thickness: 1.5, color: c });
+      page.drawLine({ start: { x: pageW - inset, y: pageH - inset }, end: { x: pageW - inset, y: pageH - inset - bracketLen }, thickness: 1.5, color: c });
+      page.drawLine({ start: { x: inset, y: inset }, end: { x: inset + bracketLen, y: inset }, thickness: 1.5, color: c });
+      page.drawLine({ start: { x: inset, y: inset }, end: { x: inset, y: inset + bracketLen }, thickness: 1.5, color: c });
+      page.drawLine({ start: { x: pageW - inset, y: inset }, end: { x: pageW - inset - bracketLen, y: inset }, thickness: 1.5, color: c });
+      page.drawLine({ start: { x: pageW - inset, y: inset }, end: { x: pageW - inset, y: inset + bracketLen }, thickness: 1.5, color: c });
+    } else if (themeId === "modern") {
+      page.drawRectangle({
+        x: 0,
+        y: pageH - 6 - bleed,
+        width: pageW,
+        height: 6,
+        color: inkColor,
+      });
+    } else if (themeId === "leather_journal") {
+      const inset = 16 + bleed;
+      page.drawRectangle({
+        x: inset,
+        y: inset,
+        width: pageW - inset * 2,
+        height: pageH - inset * 2,
+        borderColor: accentColor,
+        borderWidth: 1,
+      });
+    } else if (themeId === "magazine_style") {
+      page.drawRectangle({
+        x: 0,
+        y: pageH - 4 - bleed,
+        width: pageW,
+        height: 4,
+        color: accentColor,
+      });
+    } else if (themeId === "timeline_split") {
+      page.drawLine({
+        start: { x: marginX - 14, y: bleed + 40 },
+        end: { x: marginX - 14, y: pageH - bleed - 40 },
+        thickness: 2,
+        color: accentColor,
+      });
+    }
+
     if (print) {
       // Crop marks
       const c = rgb(0, 0, 0);
       const l = 12;
-      // top-left
       page.drawLine({ start: { x: bleed, y: pageH - bleed + 2 }, end: { x: bleed, y: pageH - bleed + l + 2 }, thickness: 0.5, color: c });
       page.drawLine({ start: { x: bleed - 2, y: pageH - bleed }, end: { x: bleed - l - 2, y: pageH - bleed }, thickness: 0.5, color: c });
-      // top-right
       page.drawLine({ start: { x: pageW - bleed, y: pageH - bleed + 2 }, end: { x: pageW - bleed, y: pageH - bleed + l + 2 }, thickness: 0.5, color: c });
       page.drawLine({ start: { x: pageW - bleed + 2, y: pageH - bleed }, end: { x: pageW - bleed + l + 2, y: pageH - bleed }, thickness: 0.5, color: c });
-      // bottom-left
       page.drawLine({ start: { x: bleed, y: bleed - 2 }, end: { x: bleed, y: bleed - l - 2 }, thickness: 0.5, color: c });
       page.drawLine({ start: { x: bleed - 2, y: bleed }, end: { x: bleed - l - 2, y: bleed }, thickness: 0.5, color: c });
-      // bottom-right
       page.drawLine({ start: { x: pageW - bleed, y: bleed - 2 }, end: { x: pageW - bleed, y: bleed - l - 2 }, thickness: 0.5, color: c });
       page.drawLine({ start: { x: pageW - bleed + 2, y: bleed }, end: { x: pageW - bleed + l + 2, y: bleed }, thickness: 0.5, color: c });
     }
@@ -165,10 +233,6 @@ async function buildPdf(
   let cursorY = pageH - marginTop;
   let pageNum = 1;
   drawPageBg(page);
-
-  const inkColor = rgb(palette.ink[0], palette.ink[1], palette.ink[2]);
-  const accentColor = rgb(palette.accent[0], palette.accent[1], palette.accent[2]);
-  const mutedColor = rgb(palette.muted[0], palette.muted[1], palette.muted[2]);
 
   const newPage = () => {
     // Footer page number
@@ -210,6 +274,184 @@ async function buildPdf(
         cursorY -= leading;
       }
       cursorY -= (opts.spaceAfter ?? 6);
+    }
+  };
+
+  const drawNarrativeWithDropCap = (narrativeText: string) => {
+    const paragraphs = narrativeText.split(/\n\n+/).filter((p) => p.trim().length > 0);
+    if (paragraphs.length === 0) return;
+
+    const firstP = paragraphs[0].trim();
+    const firstLetter = firstP.charAt(0);
+    const restFirstP = firstP.slice(1);
+
+    ensureSpace(60);
+
+    // Draw Drop Cap Box
+    const boxSize = 32;
+    const dropCapX = marginX;
+    const dropCapY = cursorY - boxSize;
+
+    page.drawRectangle({
+      x: dropCapX,
+      y: dropCapY,
+      width: boxSize,
+      height: boxSize,
+      color: accentColor,
+    });
+
+    const letterW = mainFontBold.widthOfTextAtSize(firstLetter, 22);
+    page.drawText(firstLetter, {
+      x: dropCapX + (boxSize - letterW) / 2,
+      y: dropCapY + 6,
+      size: 22,
+      font: mainFontBold,
+      color: rgb(1, 1, 1),
+    });
+
+    // Wrap first 2 lines beside drop cap box
+    const lines = wrapText(restFirstP, mainFont, 11, contentW);
+
+    let isIndented = true;
+    for (let i = 0; i < lines.length; i++) {
+      const line = lines[i];
+      if (i < 2) {
+        ensureSpace(16);
+        page.drawText(line, {
+          x: marginX + boxSize + 10,
+          y: cursorY - 12,
+          size: 11,
+          font: mainFont,
+          color: inkColor,
+        });
+        cursorY -= 16;
+      } else {
+        if (isIndented) {
+          cursorY -= 4;
+          isIndented = false;
+        }
+        ensureSpace(16);
+        page.drawText(line, {
+          x: marginX,
+          y: cursorY - 12,
+          size: 11,
+          font: mainFont,
+          color: inkColor,
+        });
+        cursorY -= 16;
+      }
+    }
+    cursorY -= 10;
+
+    // Remaining paragraphs full width
+    for (let k = 1; k < paragraphs.length; k++) {
+      drawParagraph(paragraphs[k], { size: 11, leading: 17, spaceAfter: 10 });
+    }
+  };
+
+  const drawQuoteBlock = (quoteText: string) => {
+    const q = quoteText.trim();
+    if (!q) return;
+    ensureSpace(50);
+
+    if (themeId === "magazine_style" || themeId === "modern" || themeId === "luxury_minimal") {
+      const lines = wrapText(`"${q}"`, mainFontItalic, 11.5, contentW - 24);
+      const boxHeight = lines.length * 17 + 16;
+
+      page.drawRectangle({
+        x: marginX,
+        y: cursorY - boxHeight,
+        width: contentW,
+        height: boxHeight,
+        color: rgb(palette.bg[0] * 0.96, palette.bg[1] * 0.96, palette.bg[2] * 0.96),
+      });
+
+      page.drawRectangle({
+        x: marginX,
+        y: cursorY - boxHeight,
+        width: 4,
+        height: boxHeight,
+        color: accentColor,
+      });
+
+      let qy = cursorY - 18;
+      for (const line of lines) {
+        page.drawText(line, { x: marginX + 16, y: qy, size: 11.5, font: mainFontItalic, color: inkColor });
+        qy -= 17;
+      }
+      cursorY -= boxHeight + 14;
+    } else if (themeId === "leather_journal" || themeId === "scrapbook_memories") {
+      const lines = wrapText(`"${q}"`, mainFontItalic, 11, contentW - 32);
+      const boxHeight = lines.length * 16 + 20;
+
+      page.drawRectangle({
+        x: marginX + 10,
+        y: cursorY - boxHeight,
+        width: contentW - 20,
+        height: boxHeight,
+        color: rgb(1, 0.98, 0.9),
+        borderColor: accentColor,
+        borderWidth: 1,
+      });
+
+      let qy = cursorY - 18;
+      for (const line of lines) {
+        page.drawText(line, { x: marginX + 22, y: qy, size: 11, font: mainFontItalic, color: inkColor });
+        qy -= 16;
+      }
+      cursorY -= boxHeight + 14;
+    } else {
+      drawParagraph(`“${q}”`, {
+        font: mainFontItalic,
+        size: 12.5,
+        color: accentColor,
+        align: "center",
+        leading: 19,
+        spaceAfter: 14,
+      });
+    }
+  };
+
+  const drawTimelineNodes = (timelineItems: Array<{ year: string; event: string }>) => {
+    if (!Array.isArray(timelineItems) || timelineItems.length === 0) return;
+    ensureSpace(40);
+
+    drawParagraph("Chronological Timeline", { font: mainFontBold, size: 13, color: accentColor, leading: 18, spaceAfter: 10 });
+
+    for (const item of timelineItems) {
+      ensureSpace(24);
+      const yrText = String(item.year || "");
+      const yrW = mainFontBold.widthOfTextAtSize(yrText, 9) + 12;
+
+      page.drawRectangle({
+        x: marginX,
+        y: cursorY - 16,
+        width: yrW,
+        height: 16,
+        color: accentColor,
+      });
+
+      page.drawText(yrText, {
+        x: marginX + 6,
+        y: cursorY - 12,
+        size: 9,
+        font: mainFontBold,
+        color: rgb(1, 1, 1),
+      });
+
+      const lines = wrapText(item.event, mainFont, 10.5, contentW - yrW - 14);
+      let ey = cursorY - 13;
+      for (const line of lines) {
+        page.drawText(line, {
+          x: marginX + yrW + 10,
+          y: ey,
+          size: 10.5,
+          font: mainFont,
+          color: inkColor,
+        });
+        ey -= 15;
+      }
+      cursorY -= Math.max(22, lines.length * 15 + 6);
     }
   };
 
@@ -342,71 +584,46 @@ async function buildPdf(
   // ---- Introduction ----
   if (data.manuscript?.introduction) {
     drawParagraph("Introduction", { font: mainFontBold, size: 22, color: accentColor, leading: 28, spaceAfter: 16 });
-    drawParagraph(data.manuscript.introduction, { size: 11, leading: 17, spaceAfter: 10 });
+    drawNarrativeWithDropCap(data.manuscript.introduction);
     newPage();
   }
 
   // ---- Chapters ----
   for (const ch of data.chapters) {
-    drawParagraph(`Chapter ${ch.position}`, { font: mainFontItalic, size: 11, color: mutedColor, leading: 14, spaceAfter: 4 });
-    drawParagraph(ch.title || ch.topic, { font: mainFontBold, size: 22, color: accentColor, leading: 28, spaceAfter: 16 });
+    // Chapter Opener Badge
+    ensureSpace(60);
+    const chipText = `Chapter ${ch.position}`;
+    const chipW = mainFontBold.widthOfTextAtSize(chipText, 9) + 16;
+    page.drawRectangle({
+      x: marginX,
+      y: cursorY - 18,
+      width: chipW,
+      height: 18,
+      color: accentColor,
+    });
+    page.drawText(chipText, {
+      x: marginX + 8,
+      y: cursorY - 13,
+      size: 9,
+      font: mainFontBold,
+      color: rgb(1, 1, 1),
+    });
+    cursorY -= 28;
+
+    drawParagraph(ch.title || ch.topic, { font: mainFontBold, size: 22, color: inkColor, leading: 28, spaceAfter: 12 });
     drawDivider();
 
     if (ch.narrative) {
-      drawParagraph(ch.narrative, { size: 11, leading: 17, spaceAfter: 10 });
+      drawNarrativeWithDropCap(ch.narrative);
     }
 
     if (Array.isArray(ch.timeline) && ch.timeline.length > 0) {
-      ensureSpace(40);
-      drawParagraph("Chronological Timeline", { font: mainFontBold, size: 13, color: accentColor, leading: 18, spaceAfter: 8 });
-      for (const t of ch.timeline) {
-        ensureSpace(18);
-        page.drawCircle({
-          x: marginX + 6,
-          y: cursorY - 6,
-          size: 3,
-          color: accentColor,
-        });
-        const text = `${t.year} — ${t.event}`;
-        const lines = wrapText(text, mainFont, 10.5, contentW - 20);
-        for (const line of lines) {
-          ensureSpace(15);
-          page.drawText(line, { x: marginX + 18, y: cursorY - 10, size: 10.5, font: mainFont, color: inkColor });
-          cursorY -= 15;
-        }
-        cursorY -= 4;
-      }
+      drawTimelineNodes(ch.timeline);
     }
 
     if (Array.isArray(ch.quotes) && ch.quotes.length > 0) {
       for (const q of ch.quotes) {
-        if (!q?.trim()) continue;
-        ensureSpace(50);
-        if (themeId === "magazine_style" || themeId === "modern") {
-          page.drawRectangle({
-            x: marginX,
-            y: cursorY - 30,
-            width: 3,
-            height: 30,
-            color: accentColor,
-          });
-          const lines = wrapText(`"${q.trim()}"`, mainFontItalic, 11, contentW - 16);
-          for (const line of lines) {
-            ensureSpace(16);
-            page.drawText(line, { x: marginX + 12, y: cursorY - 11, size: 11, font: mainFontItalic, color: inkColor });
-            cursorY -= 16;
-          }
-          cursorY -= 12;
-        } else {
-          drawParagraph(`"${q.trim()}"`, {
-            font: mainFontItalic,
-            size: 12,
-            color: accentColor,
-            align: "center",
-            leading: 18,
-            spaceAfter: 12,
-          });
-        }
+        drawQuoteBlock(q);
       }
     }
     newPage();
@@ -415,7 +632,7 @@ async function buildPdf(
   // ---- Ending ----
   if (data.manuscript?.ending) {
     drawParagraph("Ending Message", { font: mainFontBold, size: 22, color: accentColor, leading: 28, spaceAfter: 16 });
-    drawParagraph(data.manuscript.ending, { size: 11, leading: 17, spaceAfter: 10 });
+    drawNarrativeWithDropCap(data.manuscript.ending);
   }
 
   // Final footer
@@ -434,7 +651,7 @@ async function buildPdf(
   return await doc.save();
 }
 
-// --------- DOCX ---------
+// --------- DOCX Engine ---------
 
 async function buildDocx(data: Awaited<ReturnType<typeof loadBookData>>): Promise<Uint8Array> {
   const children: Paragraph[] = [];
