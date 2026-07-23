@@ -58,6 +58,11 @@ async function loadBookData(supabase: any, bookId: string) {
     .eq("book_id", bookId)
     .order("position");
 
+  const { data: photos } = await supabase
+    .from("book_photos")
+    .select("*")
+    .eq("book_id", bookId);
+
   return {
     book,
     manuscript,
@@ -70,10 +75,17 @@ async function loadBookData(supabase: any, bookId: string) {
       timeline: Array<{ year: string; event: string }>;
       quotes: string[];
     }>,
+    photos: (photos ?? []) as Array<{
+      id: string;
+      category: string;
+      url: string | null;
+      filename: string;
+      caption?: string;
+    }>,
   };
 }
 
-// --------- PDF Visual Design Layout Engine ---------
+// --------- PDF Visual Design Engine ---------
 
 function wrapText(text: string, font: any, size: number, maxWidth: number): string[] {
   const words = text.replace(/\r/g, "").split(/(\s+)/);
@@ -96,6 +108,19 @@ function wrapText(text: string, font: any, size: number, maxWidth: number): stri
     out.push(...parts);
   }
   return out;
+}
+
+async function fetchImageBuffer(url: string): Promise<{ bytes: Uint8Array; format: "png" | "jpg" } | null> {
+  try {
+    const res = await fetch(url);
+    if (!res.ok) return null;
+    const arrayBuffer = await res.arrayBuffer();
+    const bytes = new Uint8Array(arrayBuffer);
+    const isPng = url.toLowerCase().endsWith(".png") || (res.headers.get("content-type") || "").includes("image/png");
+    return { bytes, format: isPng ? "png" : "jpg" };
+  } catch {
+    return null;
+  }
 }
 
 async function buildPdf(
@@ -139,7 +164,7 @@ async function buildPdf(
   const mutedColor = rgb(palette.muted[0], palette.muted[1], palette.muted[2]);
 
   const drawPageBg = (page: any) => {
-    // Fill Page Background
+    // Fill Page Background Color
     page.drawRectangle({
       x: 0,
       y: 0,
@@ -352,64 +377,68 @@ async function buildPdf(
   const drawQuoteBlock = (quoteText: string) => {
     const q = quoteText.trim();
     if (!q) return;
-    ensureSpace(50);
+    ensureSpace(65);
 
-    if (themeId === "magazine_style" || themeId === "modern" || themeId === "luxury_minimal") {
-      const lines = wrapText(`"${q}"`, mainFontItalic, 11.5, contentW - 24);
-      const boxHeight = lines.length * 17 + 16;
+    const qLines = wrapText(`“${q}”`, mainFontItalic, 11.5, contentW - 48);
+    const textHeight = qLines.length * 17;
+    const boxHeight = textHeight + 36; // top padding for star symbol & bottom padding
 
-      page.drawRectangle({
-        x: marginX,
-        y: cursorY - boxHeight,
-        width: contentW,
-        height: boxHeight,
-        color: rgb(palette.bg[0] * 0.96, palette.bg[1] * 0.96, palette.bg[2] * 0.96),
-      });
+    // Card Fill & Border styling per theme (Matching the user's screenshot!)
+    let cardBg = rgb(palette.bg[0] * 0.96, palette.bg[1] * 0.96, palette.bg[2] * 0.96);
+    let cardBorder = accentColor;
 
-      page.drawRectangle({
-        x: marginX,
-        y: cursorY - boxHeight,
-        width: 4,
-        height: boxHeight,
-        color: accentColor,
-      });
-
-      let qy = cursorY - 18;
-      for (const line of lines) {
-        page.drawText(line, { x: marginX + 16, y: qy, size: 11.5, font: mainFontItalic, color: inkColor });
-        qy -= 17;
-      }
-      cursorY -= boxHeight + 14;
+    if (themeId === "storybook" || themeId === "family_album" || themeId === "timeline_split" || themeId === "classic") {
+      cardBg = rgb(0.91, 0.96, 1.0); // Soft Blue Pill Card Fill as shown in user screenshot
+      cardBorder = rgb(0.7, 0.88, 1.0);
     } else if (themeId === "leather_journal" || themeId === "scrapbook_memories") {
-      const lines = wrapText(`"${q}"`, mainFontItalic, 11, contentW - 32);
-      const boxHeight = lines.length * 16 + 20;
-
-      page.drawRectangle({
-        x: marginX + 10,
-        y: cursorY - boxHeight,
-        width: contentW - 20,
-        height: boxHeight,
-        color: rgb(1, 0.98, 0.9),
-        borderColor: accentColor,
-        borderWidth: 1,
-      });
-
-      let qy = cursorY - 18;
-      for (const line of lines) {
-        page.drawText(line, { x: marginX + 22, y: qy, size: 11, font: mainFontItalic, color: inkColor });
-        qy -= 16;
-      }
-      cursorY -= boxHeight + 14;
-    } else {
-      drawParagraph(`“${q}”`, {
-        font: mainFontItalic,
-        size: 12.5,
-        color: accentColor,
-        align: "center",
-        leading: 19,
-        spaceAfter: 14,
-      });
+      cardBg = rgb(1, 0.98, 0.88); // Soft Sticky Note Yellow fill
+      cardBorder = rgb(0.95, 0.8, 0.4);
+    } else if (themeId === "coffee_table") {
+      cardBg = rgb(0.14, 0.14, 0.14);
+      cardBorder = rgb(0.96, 0.62, 0.04);
     }
+
+    const cardX = marginX + 6;
+    const cardW = contentW - 12;
+    const cardY = cursorY - boxHeight;
+
+    // Draw Quote Card Rectangle Container
+    page.drawRectangle({
+      x: cardX,
+      y: cardY,
+      width: cardW,
+      height: boxHeight,
+      color: cardBg,
+      borderColor: cardBorder,
+      borderWidth: 1,
+    });
+
+    // Draw Star / Sparkles symbol at top center of card
+    const starSymbol = "✦";
+    const starW = mainFontBold.widthOfTextAtSize(starSymbol, 11);
+    page.drawText(starSymbol, {
+      x: (pageW - starW) / 2,
+      y: cursorY - 16,
+      size: 11,
+      font: mainFontBold,
+      color: accentColor,
+    });
+
+    // Draw Centered Italic Quote Lines
+    let textY = cursorY - 32;
+    for (const line of qLines) {
+      const lw = mainFontItalic.widthOfTextAtSize(line, 11.5);
+      page.drawText(line, {
+        x: (pageW - lw) / 2,
+        y: textY,
+        size: 11.5,
+        font: mainFontItalic,
+        color: inkColor,
+      });
+      textY -= 17;
+    }
+
+    cursorY -= (boxHeight + 14);
   };
 
   const drawTimelineNodes = (timelineItems: Array<{ year: string; event: string }>) => {
