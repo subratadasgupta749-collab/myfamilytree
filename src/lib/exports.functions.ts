@@ -58,10 +58,32 @@ async function loadBookData(supabase: any, bookId: string) {
     .eq("book_id", bookId)
     .order("position");
 
-  const { data: photos } = await supabase
+  const { data: rawPhotos } = await supabase
     .from("book_photos")
     .select("*")
     .eq("book_id", bookId);
+
+  const photos = await Promise.all(
+    (rawPhotos ?? []).map(async (p: any) => {
+      let resolvedUrl = p.url;
+      if (!resolvedUrl && p.storage_path) {
+        try {
+          const { data: pubUrl } = supabase.storage.from("book-photos").getPublicUrl(p.storage_path);
+          resolvedUrl = pubUrl?.publicUrl || null;
+        } catch {
+          resolvedUrl = null;
+        }
+      }
+      return {
+        id: p.id,
+        category: p.category || "general",
+        url: resolvedUrl,
+        storage_path: p.storage_path || null,
+        filename: p.filename || "photo.jpg",
+        caption: p.caption || p.title || null,
+      };
+    })
+  );
 
   return {
     book,
@@ -75,13 +97,7 @@ async function loadBookData(supabase: any, bookId: string) {
       timeline: Array<{ year: string; event: string }>;
       quotes: string[];
     }>,
-    photos: (photos ?? []) as Array<{
-      id: string;
-      category: string;
-      url: string | null;
-      filename: string;
-      caption?: string;
-    }>,
+    photos,
   };
 }
 
@@ -256,6 +272,21 @@ function getThemeCardStyles(themeId: string, palette: ThemePalette): ThemeCardSt
       badgeText: rgb(1, 1, 1),
       styleType: "center_serif",
     };
+  }
+}
+
+async function fetchImageBuffer(url: string): Promise<{ bytes: Uint8Array; format: "png" | "jpg" } | null> {
+  try {
+    if (!url) return null;
+    const res = await fetch(url);
+    if (!res.ok) return null;
+    const arrayBuffer = await res.arrayBuffer();
+    const bytes = new Uint8Array(arrayBuffer);
+    const contentType = res.headers.get("content-type") || "";
+    const isPng = url.toLowerCase().includes(".png") || contentType.includes("image/png");
+    return { bytes, format: isPng ? "png" : "jpg" };
+  } catch {
+    return null;
   }
 }
 
@@ -655,6 +686,99 @@ async function buildPdf(
     }
   };
 
+  const drawChapterPhoto = async (photo: { url: string | null; filename: string; caption?: string }) => {
+    if (!photo) return;
+    const cardStyles = getThemeCardStyles(themeId, palette);
+
+    let embeddedImg: any = null;
+    if (photo.url) {
+      const imgRes = await fetchImageBuffer(photo.url);
+      if (imgRes) {
+        try {
+          embeddedImg = imgRes.format === "png" ? await doc.embedPng(imgRes.bytes) : await doc.embedJpg(imgRes.bytes);
+        } catch {
+          embeddedImg = null;
+        }
+      }
+    }
+
+    if (embeddedImg) {
+      const scaled = embeddedImg.scaleToFit(contentW - 32, 210);
+      const imgW = scaled.width;
+      const imgH = scaled.height;
+      const frameH = imgH + 20 + (photo.caption ? 18 : 0);
+
+      ensureSpace(frameH + 16);
+
+      const frameX = marginX + (contentW - imgW - 16) / 2;
+      const frameY = cursorY - frameH;
+
+      // Draw Photo Frame Card Container
+      page.drawRectangle({
+        x: frameX,
+        y: frameY,
+        width: imgW + 16,
+        height: frameH,
+        color: cardStyles.cardBg,
+        borderColor: cardStyles.cardBorder,
+        borderWidth: 1,
+      });
+
+      // Draw Photo Image
+      page.drawImage(embeddedImg, {
+        x: frameX + 8,
+        y: frameY + (photo.caption ? 24 : 8),
+        width: imgW,
+        height: imgH,
+      });
+
+      // Draw Photo Caption if available
+      if (photo.caption) {
+        const capText = sanitizeWinAnsi(photo.caption);
+        const capW = mainFontItalic.widthOfTextAtSize(capText, 9.5);
+        page.drawText(capText, {
+          x: (pageW - capW) / 2,
+          y: frameY + 8,
+          size: 9.5,
+          font: mainFontItalic,
+          color: cardStyles.cardInk,
+        });
+      }
+
+      cursorY -= (frameH + 20);
+    } else {
+      // Photo Frame Placeholder Box
+      const boxH = 120;
+      ensureSpace(boxH + 16);
+
+      const frameX = marginX + 16;
+      const frameW = contentW - 32;
+      const frameY = cursorY - boxH;
+
+      page.drawRectangle({
+        x: frameX,
+        y: frameY,
+        width: frameW,
+        height: boxH,
+        color: cardStyles.cardBg,
+        borderColor: cardStyles.cardBorder,
+        borderWidth: 1,
+      });
+
+      const photoLabel = sanitizeWinAnsi(photo.caption || photo.filename || "Family Heirloom Photograph");
+      const lblW = mainFontItalic.widthOfTextAtSize(photoLabel, 10);
+      page.drawText(photoLabel, {
+        x: (pageW - lblW) / 2,
+        y: frameY + boxH / 2 - 4,
+        size: 10,
+        font: mainFontItalic,
+        color: cardStyles.headerColor,
+      });
+
+      cursorY -= (boxH + 20);
+    }
+  };
+
   const drawDivider = () => {
     ensureSpace(20);
     if (themeId === "classic" || themeId === "heritage") {
@@ -819,6 +943,23 @@ async function buildPdf(
 
     if (Array.isArray(ch.timeline) && ch.timeline.length > 0) {
       drawTimelineNodes(ch.timeline);
+    }
+
+    // Render Chapter Photos into PDF!
+    const chapterPhotos = data.photos.filter(
+      (p) =>
+        p.category?.toLowerCase() === ch.topic?.toLowerCase() ||
+        p.category?.toLowerCase() === `chapter_${ch.position}`
+    );
+    const photosToDraw =
+      chapterPhotos.length > 0
+        ? chapterPhotos
+        : data.photos[ch.position - 1]
+        ? [data.photos[ch.position - 1]]
+        : [];
+
+    for (const photo of photosToDraw) {
+      await drawChapterPhoto(photo);
     }
 
     if (Array.isArray(ch.quotes) && ch.quotes.length > 0) {
